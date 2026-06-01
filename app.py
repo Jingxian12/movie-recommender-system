@@ -194,6 +194,7 @@ elif st.session_state.mode == "user":
             tmdb_id = int(movies[movies["title"] == movie]["tmdbId"].values[0])
             # ✅ FIX: USE tmdbId (NOT index)
             if str(tmdb_id) not in content_topk:
+                st.write("Dictionary keys type template:", type(list(content_topk.keys())[0]))
                 st.error("No recommendations found")
             else:
                 rec_list = content_topk[str(tmdb_id)]
