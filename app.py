@@ -117,49 +117,47 @@ if "mode" not in st.session_state:
 # =========================
 if st.session_state.mode == "home":
     
-    # 1. 顶部标语与功能分区（使用 1:1 两列布局）
+    # 1. Feature Showcases (2-Column Modern Grid Layout)
     col1, col2 = st.columns(2, gap="large")
     
     with col1:
-        # 使用 border=True 创建一个漂亮的容器卡片
+        # st.container(border=True) creates a beautiful modern card shadow box
         with st.container(border=True):
-            st.markdown("### 🔐 个人定制模式")
+            st.markdown("### 🔐 Personalized Experience")
             st.markdown(
                 """
-                * 📈 **专属协同过滤**：分析你的历史评分
-                * 🎯 **精准预测评分**：猜你最喜欢的电影
-                * 📂 **同步历史记录**：保存你的观影足迹
+                * 📈 **Collaborative Filtering**: Analyzes your historical ratings.
+                * 🎯 **Predictive Scoring**: Guessing what you will love next.
+                * 📂 **Viewing History**: Track and sync your personal watchlist.
                 """
             )
-            # 按钮拉满整行宽度，更具点击感
-            if st.button("进入登录界面", use_container_width=True, type="primary"):
+            # Primary button makes it pop as the main call to action
+            if st.button("Log In to Your Profile", use_container_width=True, type="primary"):
                 st.session_state.mode = "login"
                 st.rerun()
 
     with col2:
         with st.container(border=True):
-            st.markdown("### 🚀 探索游客模式")
+            st.markdown("### 🚀 Quick Guest Mode")
             st.markdown(
                 """
-                * 📄 **文本特征匹配**：输入关键词找电影
-                * 🎭 **风格氛围探索**：按喜爱的题材筛选
-                * 🍿 **零门槛即搜即得**：无需注册直接开启
+                * 📄 **Content-Based Discovery**: Find movies by keywords & vibes.
+                * 🎭 **Genre & Mood Explorer**: Filter by themes you feel like today.
+                * 🍿 **Instant Results**: No account needed, jump straight in.
                 """
             )
-            if st.button("以游客身份继续", use_container_width=True):
+            if st.button("Continue as Guest", use_container_width=True):
                 st.session_state.mode = "guest"
                 st.rerun()
 
     st.divider()
 
-    # 2. 底部添加“今日热门”或“经典必看”瀑布流，让首页充满电影元素
-    st.subheader("🔥 Explore Popular Movies Right Now")
+    # 2. Bottom Carousel: Hook the user immediately with beautiful movie posters
+    st.subheader("🔥 Explore Trending Movies Right Now")
     
-    # 假设你的 movies 数据集中有评分人数、播放量或直接随机抽取10部作为展示
-    # 这里示范抽取 5 部展示在首页底部
     if 'movies' in locals() or 'movies' in globals():
         try:
-            # 优先选择评分高或热门的，如果没有字段则直接 sample(5)
+            # Smart sorting based on whatever columns you have available
             if "views" in movies.columns:
                 hot_movies = movies.sort_values(by="views", ascending=False).head(5)
             elif "vote_count" in movies.columns:
@@ -167,17 +165,16 @@ if st.session_state.mode == "home":
             else:
                 hot_movies = movies.sample(5)
                 
-            # 渲染 5 列海报
+            # Render a 5-column grid for movie posters
             poster_cols = st.columns(5)
             for idx, (_, row) in enumerate(hot_movies.iterrows()):
                 with poster_cols[idx]:
                     poster = row["poster_url"] if str(row["poster_url"]) != "nan" else "https://placeholder.com"
                     st.image(poster, use_container_width=True)
-                    # 只展示标题，不赋予点击事件，保持首页轻量
+                    # Use captions for titles to keep the layout lightweight
                     st.caption(f"**{row['title']}**")
         except Exception:
-            pass # 防止因为数据集字段不匹配导致首页崩溃
-
+            pass # Failsafe to ensure your home page never crashes due to column mismatch
 # =========================
 # LOGIN
 # =========================
