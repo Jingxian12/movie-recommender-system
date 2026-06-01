@@ -40,7 +40,6 @@ user_item_matrix = ratings.pivot_table(
 # =========================
 # LOAD MODELS
 # =========================
-
 # CF
 with gzip.open("models/cf/item_topk.pkl.gz", "rb") as f:
     item_topk = pickle.load(f)
@@ -57,7 +56,6 @@ with gzip.open("models/nlp/sbert_embeddings.pkl.gz", "rb") as f:
 # CF FUNCTION
 # =========================
 def recommend_cf(user_id):
-
     if user_id not in user_item_matrix.index:
         return movies.sample(10)
 
@@ -80,23 +78,21 @@ def recommend_cf(user_id):
 # =========================
 # MOVIE DETAILS UI
 # =========================
-def show_movie(row):
+@st.dialog("🎬 Movie Details")
+def show_movie_popup(movie):
 
-    st.subheader(row["title"])
-
-    col1, col2 = st.columns([1, 2])
+    col1, col2 = st.columns([1,2])
 
     with col1:
-        st.image(row["poster_url"], use_container_width=True)
+        st.image(movie["poster_url"], use_container_width=True)
 
     with col2:
-        st.write("**Genres:**", row["genres"])
-        st.write("**Overview:**", row["overview"])
-        st.write("**Cast:**", row["cast"])
-        st.write("**Director:**", row["director"])
-        st.write("**Rating:**", row["vote_average"])
-        st.write("**Runtime:**", row["runtime"])
-        st.write("**Release:**", row["release_date"])
+        st.subheader(movie["title"])
+        st.write("Genres:", movie["genres"])
+        st.write("Rating:", movie["vote_average"])
+        st.write("Director:", movie["director"])
+        st.write("Cast:", movie["cast"])
+        st.write(movie["overview"])
 
 # =========================
 # LOGOUT FUNCTION
@@ -222,7 +218,7 @@ elif st.session_state.mode == "user":
                         st.image(row["poster_url"], use_container_width=True)
 
                         if st.button(row["title"], key=f"tfidf_{i}"):
-                            selected = row
+                              show_movie_popup(row)
 
                 if selected is not None:
                     st.divider()
