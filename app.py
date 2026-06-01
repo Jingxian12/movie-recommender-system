@@ -93,9 +93,6 @@ if "mode" not in st.session_state:
 # HOME
 # =========================
 if st.session_state.mode == "home":
-
-    st.title("🎬 Hybrid Movie Recommender System")
-
     col1, col2 = st.columns(2)
 
     with col1:
