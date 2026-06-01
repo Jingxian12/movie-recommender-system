@@ -12,7 +12,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 st.set_page_config(page_title="Hybrid Movie Recommender", layout="wide")
 
 st.title("🎬 Hybrid Movie Recommender System")
-st.caption("CF + Content-Based + SBERT Semantic Search")
+st.caption("Welcome to MovieMatch! Log in with your User ID to unlock personalized recommendations based on your unique rating history, or jump straight into Guest Mode to explore movies by matching your favorite vibes and descriptions")
 st.divider()
 
 # =========================
