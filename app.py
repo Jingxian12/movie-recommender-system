@@ -1,17 +1,19 @@
 import streamlit as st 
 
-st.set_page_config(
-    page_title="Hybrid Movie Recommender",
-    layout="wide"
+st.title("🎬 Hybrid Movie Recommender")
+
+user_id = st.text_input(
+    "Enter User ID (Optional)"
 )
 
-st.title("🎬 Hybrid Movie Recommender System")
+if user_id:
+    st.success(f"Welcome User {user_id}")
+    recommendations = get_cf_recommendations(int(user_id))
+    show_movies(recommendations)
 
-mode = st.sidebar.radio(
-    "Select Recommendation Mode",
-    [
-        "Personalized Recommendation",
-        "Similar Movie Search",
-        "Semantic Search"
-    ]
-)
+else:
+    st.info(
+        "No User ID entered. "
+        "You can use Similar Movie Search "
+        "or Semantic Search."
+    )
