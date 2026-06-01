@@ -17,7 +17,7 @@ st.title("🎬 Hybrid Movie Recommender System")
 # LOAD DATA
 # =========================
 movies = pd.read_csv("dataset/tmdb_clean.csv")
-ratings = pd.read_csv("dataset/ratings.csv")
+ratings = pd.read_csv("dataset/ratings_clean.csv")
 links = pd.read_csv("dataset/movieLens.csv")
 
 # =========================
