@@ -191,25 +191,30 @@ elif st.session_state.mode == "user":
         movie = st.selectbox("Select Movie", movies["title"])
 
         if st.button("Recommend"):
-            tmdb_id = int(movies[movies["title"] == movie]["tmdbId"].values[0])
-            # ✅ FIX: USE tmdbId (NOT index)
-            if str(tmdb_id) not in content_topk:
-                st.write("Dictionary keys type template:", type(list(content_topk.keys())[0]))
+            # 1. 提取原始 tmdbId
+            raw_id = movies[movies["title"] == movie]["tmdbId"].values[0]
+            
+            # 2. 强制转换为整数（防止出现 862.0 这种浮点数导致匹配失败）
+            tmdb_id_int = int(float(raw_id))
+            
+            # 3. 核心修复：直接用整数去字典里查找
+            if tmdb_id_int not in content_topk:
                 st.error("No recommendations found")
             else:
-                rec_list = content_topk[str(tmdb_id)]
+                rec_list = content_topk[tmdb_id_int]
 
-                rec_tmdb = [i[0] for i in rec_list]
-                rec_movies = movies[movies["tmdbId"].isin(rec_tmdb)].reset_index(drop=True)
+                # 4. 获取推荐电影的 ID 列表（确保里面的 ID 也都是整数类型）
+                rec_tmdb = [int(float(i[0])) for i in rec_list]
+                
+                # 5. 过滤出推荐的电影数据，同时确保 DataFrame 的列也转为 int 匹配
+                rec_movies = movies[movies["tmdbId"].astype(float).astype(int).isin(rec_tmdb)].reset_index(drop=True)
 
                 selected = None
                 cols = st.columns(5)
 
                 for i, row in rec_movies.iterrows():
-
                     with cols[i % 5]:
                         st.image(row["poster_url"], use_container_width=True)
-
                         if st.button(row["title"], key=f"tfidf_{i}"):
                               selected = row
 
