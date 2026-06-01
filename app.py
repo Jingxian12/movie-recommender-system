@@ -88,11 +88,13 @@ def show_movie_popup(movie):
 
     with col2:
         st.subheader(movie["title"])
-        st.write("Genres:", movie["genres"])
-        st.write("Rating:", movie["vote_average"])
-        st.write("Director:", movie["director"])
-        st.write("Cast:", movie["cast"])
-        st.write(movie["overview"])
+        st.write("**Genres:**", movie["genres"])
+        st.write("**Overview:**", movie["overview"])
+        st.write("**Cast:**", movie["cast"])
+        st.write("**Director:**", movie["director"])
+        st.write("**Rating:**", movie["vote_average"])
+        st.write("**Runtime:**", movie["runtime"])
+        st.write("**Release Date:**", movie["release_date"])
 
 # =========================
 # LOGOUT FUNCTION
@@ -218,7 +220,7 @@ elif st.session_state.mode == "user":
                         st.image(row["poster_url"], use_container_width=True)
 
                         if st.button(row["title"], key=f"tfidf_{i}"):
-                              show_movie_popup(row)
+                              selected = row
 
                 if selected is not None:
                     st.divider()
