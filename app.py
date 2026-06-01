@@ -11,7 +11,10 @@ from sklearn.metrics.pairwise import cosine_similarity
 # PAGE CONFIG
 # =========================
 st.set_page_config(page_title="Hybrid Movie Recommender", layout="wide")
+
 st.title("🎬 Hybrid Movie Recommender System")
+st.caption("Discover your next favorite movie using Content-based and Collaborative filtering.")
+st.divider() 
 
 # =========================
 # LOAD DATA
