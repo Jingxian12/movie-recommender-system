@@ -44,7 +44,7 @@ with gzip.open("models/cf/item_topk.pkl.gz", "rb") as f:
     item_topk = pickle.load(f)
 
 # TF-IDF
-with gzip.open("models/content/content_topk.pkl.gz", "rb") as f:
+with gzip.open("models/content/tfidf_topk.pkl.gz", "rb") as f:
     content_topk = pickle.load(f)
 
 # SBERT embeddings (FIXED)
