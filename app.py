@@ -1,19 +1,39 @@
 import streamlit as st 
 
+if "mode" not in st.session_state:
+    st.session_state.mode = None
+
 st.title("🎬 Hybrid Movie Recommender")
 
-user_id = st.text_input(
-    "Enter User ID (Optional)"
-)
+col1, col2 = st.columns(2)
 
-if user_id:
-    st.success(f"Welcome User {user_id}")
-    recommendations = get_cf_recommendations(int(user_id))
-    show_movies(recommendations)
+with col1:
+    if st.button("Login"):
+        st.session_state.mode = "login"
 
-else:
-    st.info(
-        "No User ID entered. "
-        "You can use Similar Movie Search "
-        "or Semantic Search."
-    )
+with col2:
+    if st.button("Skip"):
+        st.session_state.mode = "guest"
+
+
+if st.session_state.mode == "login":
+
+    user_id = st.text_input("Enter User ID")
+
+    if st.button("Submit"):
+
+        if int(user_id) in ratings_df["userId"].unique():
+
+            st.session_state.user_id = int(user_id)
+            st.session_state.mode = "user"
+
+        else:
+            st.error("User ID not found")
+
+if st.session_state.mode == "user":
+
+    tab1, tab2, tab3 = st.tabs([
+        "🏠 Personalized",
+        "🎥 Similar Movies",
+        "🧠 Semantic Search"
+    ])
