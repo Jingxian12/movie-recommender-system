@@ -79,7 +79,7 @@ def recommend_cf(user_id):
 # MOVIE DETAILS UI
 # =========================
 @st.dialog("🎬 Movie Details")
-def show_movie_popup(movie):
+def show_movie(movie):
 
     col1, col2 = st.columns([1,2])
 
