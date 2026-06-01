@@ -78,7 +78,7 @@ def recommend_cf(user_id):
 # =========================
 # MOVIE DETAILS UI
 # =========================
-@st.dialog("🎬 Movie Details")
+@st.dialog("🎬 Movie Details",width="large")
 def show_movie(movie):
 
     col1, col2 = st.columns([1,2])
