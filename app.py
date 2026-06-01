@@ -99,6 +99,16 @@ def show_movie(row):
         st.write("**Release:**", row["release_date"])
 
 # =========================
+# LOGOUT FUNCTION
+# =========================
+def logout():
+    st.session_state.mode = "home"
+
+    if "user_id" in st.session_state:
+        del st.session_state.user_id
+
+
+# =========================
 # SESSION STATE
 # =========================
 if "mode" not in st.session_state:
@@ -143,6 +153,12 @@ elif st.session_state.mode == "login":
 # =========================
 elif st.session_state.mode == "user":
 
+    col1, col2 = st.columns([8, 1])
+
+    with col2:
+        if st.button("🚪 Sign Out"):
+            logout()
+            st.rerun()
     st.success(f"Welcome User {st.session_state.user_id}")
 
     tab1, tab2, tab3 = st.tabs([
@@ -250,6 +266,12 @@ elif st.session_state.mode == "user":
 # GUEST MODE
 # =========================
 elif st.session_state.mode == "guest":
+    col1, col2 = st.columns([8, 1])
+
+    with col2:
+        if st.button("🏠 Home"):
+            logout()
+            st.rerun()
 
     st.title("🎥 Guest Mode")
 
