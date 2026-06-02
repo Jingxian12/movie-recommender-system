@@ -184,7 +184,7 @@ elif st.session_state.mode == "login":
             st.error("❌ User not found. Please enter a valid ID!")
 
 # =========================
-# 3. USER MODE
+# 3. USER MODE (Valid User Page)
 # =========================
 elif st.session_state.mode == "user":
     col1, col2 = st.columns([8, 1])
@@ -196,12 +196,70 @@ elif st.session_state.mode == "user":
 
     tab1, tab2, tab3 = st.tabs(["🏠 CF", "🎥 Content-Based", "🧠 SBERT"])
 
-    with tab1:
-        st.header("Personalized Recommendations")
-        recs = recommend_cf(st.session_state.user_id, user_item_matrix, item_topk, movies).reset_index(drop=True)
-        selected = render_movie_grid(recs, "cf")
-        if selected is not None:
-            show_movie(selected)
+# =========================
+    # CF TAB (PERSONALIZED)
+    # =========================
+        with tab1:
+            # 1. Fetch the user's historical rating metrics for a personalized greeting
+            user_ratings_all = user_item_matrix.loc[st.session_state.user_id]
+            watched_movies = user_ratings_all[user_ratings_all > 0]
+            total_watched = len(watched_movies)
+            avg_user_rating = round(watched_movies.mean(), 1) if total_watched > 0 else 0
+    
+            # Welcome Summary Banner
+            st.markdown(f"### 👋 Welcome back, Explorer!")
+            st.markdown(
+                f"You have rated **{total_watched} movies** with an average score of **{avg_user_rating} ⭐**. "
+                "Based on your unique taste footprint, we have curated these special match categories for you:"
+            )
+    
+            # 2. Helpful Context Box
+            st.info(
+                "💡 **How these are chosen:** We found other film lovers who share your exact movie ratings, "
+                "and brought forward the titles they rated highly that you haven't discovered yet!"
+            )
+            
+            st.divider()
+    
+            # 3. Fetch recommendations from your model
+            # We fetch a larger pool (e.g., 20 movies) so we can filter and shuffle them!
+            raw_recs = recommend_cf(st.session_state.user_id, user_item_matrix, item_topk, movies)
+            
+            if raw_recs.empty:
+                st.warning("Complete a few more ratings in our system to unlock custom picks!")
+            else:
+                # Action controls row: Let them mix things up
+                col_header, col_btn = st.columns([4, 1])
+                with col_btn:
+                    # A shuffle button that triggers a simple UI state rerun
+                    shuffle_clicked = st.button("🔄 Shuffle My Picks", use_container_width=True)
+    
+                # Row 1: Top Picks (Sorted by highest popularity within your recommended pool)
+                st.markdown("#### 🏆 Your Absolute Top Matches")
+                st.caption("Highly-rated blockbusters that fit your profile perfectly.")
+                
+                top_picks = raw_recs.sort_values(by="popularity", ascending=False).head(5)
+                if shuffle_clicked:
+                    top_picks = raw_recs.sample(min(5, len(raw_recs)))
+                    
+                selected_top = render_movie_grid(top_picks.reset_index(drop=True), "cf_top")
+                if selected_top is not None:
+                    show_movie(selected_top)
+    
+                st.write("") # Spacer
+    
+                # Row 2: Hidden Gems (Low popularity scores in the dataset, but highly recommended by CF)
+                st.markdown("#### 💎 Underrated Hidden Gems")
+                st.caption("Less mainstream movies that people with your exact taste absolutely loved.")
+                
+                # Grabbing movies with lower popularity metrics to serve as lesser-known gems
+                hidden_gems = raw_recs.sort_values(by="popularity", ascending=True).head(5)
+                if shuffle_clicked:
+                    hidden_gems = raw_recs.sample(min(5, len(raw_recs)))
+                    
+                selected_gem = render_movie_grid(hidden_gems.reset_index(drop=True), "cf_gem")
+                if selected_gem is not None:
+                    show_movie(selected_gem)
 
     with tab2:
         st.header("Similar Movies (Content-Based)")
