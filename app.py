@@ -288,8 +288,8 @@ elif st.session_state.mode == "user":
 # =========================
 elif st.session_state.mode == "guest":
     col1, col2 = st.columns([8, 1])
-    with col2:
-        if st.button("🏠 Home", key="guest_home"):
+    with col1:
+        if st.button("🏡 Home Page", key="guest_home"):
             logout()
             st.rerun()
 
