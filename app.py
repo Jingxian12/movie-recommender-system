@@ -234,7 +234,7 @@ elif st.session_state.mode == "login":
             st.rerun()
 
     st.subheader("Enter User ID")
-    uid = st.text_input("User ID")
+    uid = st.text_input("User ID",placeholder="e.g., 42")
     
     # 2. Password input (type="password" hides the characters)
     password = st.text_input("Password", type="password", placeholder="Enter your password")
