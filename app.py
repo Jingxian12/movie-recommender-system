@@ -110,7 +110,7 @@ if st.session_state.mode == "home":
             st.markdown("### 🚀 Quick Guest Mode")
             st.markdown(
                 """
-                * 📄 **Search by Vibe**: Find movies by matching descriptions, moods, or keywords.
+                * 📄 **Search by Vibe**: Find movies by matching descriptions, moods.
                 * 🎭 **Instant Mix**: Pick a favorite film and instantly see choices just like it.
                 * 🍿 **Zero Setup**: No account or password needed—just jump straight in!
                 """
