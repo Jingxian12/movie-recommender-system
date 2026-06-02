@@ -135,51 +135,65 @@ def render_search_vibe_tab(prefix):
 
 
 def render_advanced_search_tab(prefix):
-    st.header("🎭 Advanced Studio Search")
-    st.caption("Mix and match criteria to scan our entire global database.")
+    st.header("🔍 Global Studio Search")
+    st.caption("Choose a category method below to find your next favorite movie.")
 
-    # 1. Setup search filter input widgets layout
-    col_g, col_c, col_d = st.columns(3)
+    # 1. Main navigation radio selection
+    search_method = st.radio(
+        "How would you like to browse?",
+        ["🎭 Browse by Genre", "🎬 Find by Actor/Actress", "🎥 Find by Director"],
+        horizontal=True,
+        key=f"{prefix}_search_method_radio"
+    )
     
-    with col_g:
-        # Extract unique genres for dropdown selector
-        all_genres = ["All Genres"] + sorted(list(set([g.strip() for sublist in movies['genres'].dropna().str.split(',') for g in sublist])))
-        selected_genre = st.selectbox("Genre", all_genres, key=f"{prefix}_adv_genre")
+    st.write("") 
+
+    filtered_df = pd.DataFrame()
+    search_triggered = False
+
+    # 2. Render dropdown menus dynamically based on selection
+    if search_method == "🎭 Browse by Genre":
+        all_genres = ["Select a Genre..."] + sorted(list(set([g.strip() for sublist in movies['genres'].dropna().str.split(',') for g in sublist])))
+        selected_genre = st.selectbox("Pick a Category", all_genres, key=f"{prefix}_adv_genre")
         
-    with col_c:
-        search_cast = st.text_input("Actor / Actress Name", placeholder="e.g., Tom Hanks", key=f"{prefix}_adv_cast").strip()
+        if selected_genre != "Select a Genre...":
+            filtered_df = movies[movies['genres'].str.contains(selected_genre, na=False, case=False)]
+            search_triggered = True
+
+    elif search_method == "🎬 Find by Actor/Actress":
+        # Extract, split, and clean all unique actors from your dataset automatically
+        all_actors = ["Select an Actor/Actress..."] + sorted(list(set([actor.strip() for sublist in movies['cast'].dropna().str.split(',') for actor in sublist])))
+        selected_actor = st.selectbox("Pick an Actor/Actress", all_actors, key=f"{prefix}_adv_cast")
         
-    with col_d:
-        search_director = st.text_input("Director Name", placeholder="e.g., Christopher Nolan", key=f"{prefix}_adv_director").strip()
+        if selected_actor != "Select an Actor/Actress...":
+            filtered_df = movies[movies['cast'].str.contains(selected_actor, na=False, case=False)]
+            search_triggered = True
 
-    # 2. Apply filtering logic iteratively
-    filtered_df = movies.copy()
-
-    # Filter by Genre if selected
-    if selected_genre != "All Genres":
-        filtered_df = filtered_df[filtered_df['genres'].str.contains(selected_genre, na=False, case=False)]
-
-    # Filter by Cast string match if typed
-    if search_cast:
-        filtered_df = filtered_df[filtered_df['cast'].str.contains(search_cast, na=False, case=False)]
-
-    # Filter by Director string match if typed
-    if search_director:
-        filtered_df = filtered_df[filtered_df['director'].str.contains(search_director, na=False, case=False)]
+    elif search_method == "🎥 Find by Director":
+        # Extract, split, and clean all unique directors from your dataset automatically
+        all_directors = ["Select a Director..."] + sorted(list(set([dir_name.strip() for sublist in movies['director'].dropna().str.split(',') for dir_name in sublist])))
+        selected_director = st.selectbox("Pick a Director", all_directors, key=f"{prefix}_adv_director")
+        
+        if selected_director != "Select a Director...":
+            filtered_df = movies[movies['director'].str.contains(selected_director, na=False, case=False)]
+            search_triggered = True
 
     st.divider()
     
-    # 3. Output results banner summary
-    total_results = len(filtered_df)
-    if total_results > 0:
-        st.markdown(f"📊 Found **{total_results}** matching movies matching your layout filters:")
-        
-        # Call the updated chunking layout grid to display everything!
-        selected = render_movie_grid(filtered_df.reset_index(drop=True), f"{prefix}_search_grid")
-        if selected is not None:
-            show_movie(selected)
+    # 3. Layout Rendering Engine
+    if not search_triggered:
+        st.info("💡 Select an option from the dropdown menu above to display matching movies instantly!")
     else:
-        st.warning("🕵️ No matches found! Try broadening your search fields or adjusting spelling.")
+        total_results = len(filtered_df)
+        if total_results > 0:
+            st.markdown(f"📊 Found **{total_results}** matching results:")
+            
+            # Show all matching rows safely using your scrolling chunk grid
+            selected = render_movie_grid(filtered_df.reset_index(drop=True), f"{prefix}_search_grid")
+            if selected is not None:
+                show_movie(selected)
+        else:
+            st.warning("🕵️ No matches found for this selection.")
 
 # =========================
 # SESSION STATE CONTROL
