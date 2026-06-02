@@ -116,14 +116,16 @@ if st.session_state.mode == "home":
         poster_cols = st.columns(5)
         for idx, (_, row) in enumerate(hot_movies.iterrows()):
             with poster_cols[idx]:
-                poster = row["poster_url"] if str(row["poster_url"]) != "nan" else "https://placeholder.com"
-                st.image(poster, use_container_width=True)
-                
-                # --- KEY IMPLEMENTATION HERE ---
-                # Use the title as a button. When clicked, it calls your show_movie function.
-                # We add key=f"trend_{idx}" so Streamlit can track each unique button.
-                if st.button(row['title'], key=f"trend_{idx}", use_container_width=True):
-                    show_movie(row)
+                # --- KEY IMPLEMENTATION: Wrap the content in a bordered container ---
+                with st.container(border=True):
+                    poster = row["poster_url"] if str(row["poster_url"]) != "nan" else "https://placeholder.com"
+                    st.image(poster, use_container_width=True)
+                    
+                    # --- KEY IMPLEMENTATION HERE ---
+                    # Use the title as a button. When clicked, it calls your show_movie function.
+                    # We add key=f"trend_{idx}" so Streamlit can track each unique button.
+                    if st.button(row['title'], key=f"trend_{idx}", use_container_width=True):
+                        show_movie(row)
                     
     except Exception as e:
         # Optional: print the error to your terminal during development to debug issues
