@@ -89,7 +89,7 @@ if st.session_state.mode == "home":
         with st.container(border=True):
             st.markdown("### 🔐 Personalized Experience")
             st.markdown("- 📈 **Collaborative Filtering**: History analysis.\n- 🎯 **Predictive Scoring**: Guessing your favorites.")
-            if st.button("Log In to Your Profile", use_container_width=True, type="primary"):
+            if st.button("Log In to Your Profile", use_container_width=True, type="primary",icon="🚨"):
                 st.session_state.mode = "login"
                 st.rerun()
 
