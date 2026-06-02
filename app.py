@@ -300,9 +300,9 @@ elif st.session_state.mode == "guest":
     ])
 
     with tab1:
-        st.header("What's Hot")
+        st.header("🔥 What's Hot")
         st.caption("The most famous blockbuster movies actively trending globally right now.")
-        min_votes = 2000
+        min_votes = 10000
         qualified = movies[movies["vote_count"] >= min_votes]
         popular_recs = qualified.sort_values(by=["popularity", "vote_count"], ascending=[False, False]).head(5).reset_index(drop=True)
         
