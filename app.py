@@ -194,13 +194,23 @@ if st.session_state.mode == "home":
 
     st.divider()
     # Trending Movie Poster 
-    st.subheader("🔥 Explore Trending Movies Right Now")
+    st.subheader("✨ Latest Hits & New Releases")
     
     try:
-        new_movies = movies.sort_values(by=["release_date","popularity"], ascending=[False, False]).head(5)
+        # 1. Ensure the release_date column is in datetime format so pandas can sort it correctly
+        movies["release_date_dt"] = pd.to_datetime(movies["release_date"], errors="coerce")
+        
+        # 2. Quality Control: Filter out unreleased or obscure movies
+        min_votes_for_new = 500 
+        qualified_new = movies[movies["vote_count"] >= min_votes_for_new
+        
+        # 3. Multi-tiered Sort: Sort primarily by newest date, secondarily by popularity
+        latest_movies = qualified_new.sort_values(by=["release_date_dt", "popularity"], ascending=[False, False]).head(5).reset_index(drop=True)
     
-       # 3. Call the function
-        clicked_trending = render_movie_grid(new_movies, "trend")
+       # 4. Clean up the temporary datetime column so it doesn't mess up your data profile
+        latest_movies = latest_movies.drop(columns=["release_date_dt"])
+        
+        clicked_trending = render_movie_grid(latest_movies, "latest")
         if clicked_trending is not None:
             show_movie(clicked_trending)
                     
