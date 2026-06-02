@@ -133,12 +133,17 @@ def render_search_vibe_tab(prefix):
         if selected is not None:
             show_movie(selected)
 
-
 def render_advanced_search_tab(prefix):
     st.header("🔍 Global Studio Search")
     st.caption("Choose a category method below to find your next favorite movie.")
 
-    # 1. Main navigation radio selection
+    # 1. Initialize page tracking variables in session state if they don't exist
+    if f"{prefix}_current_page" not in st.session_state:
+        st.session_state[f"{prefix}_current_page"] = 0
+    if f"{prefix}_previous_search" not in st.session_state:
+        st.session_state[f"{prefix}_previous_search"] = ""
+
+    # 2. Main navigation radio selection
     search_method = st.radio(
         "How would you like to browse?",
         ["🎭 Browse by Genre", "🎬 Find by Actor/Actress", "🎥 Find by Director"],
@@ -150,8 +155,9 @@ def render_advanced_search_tab(prefix):
 
     filtered_df = pd.DataFrame()
     search_triggered = False
+    current_search_key = ""
 
-    # 2. Render dropdown menus dynamically based on selection
+    # 3. Render dropdown menus dynamically based on selection
     if search_method == "🎭 Browse by Genre":
         all_genres = ["Select a Genre..."] + sorted(list(set([g.strip() for sublist in movies['genres'].dropna().str.split(',') for g in sublist])))
         selected_genre = st.selectbox("Pick a Category", all_genres, key=f"{prefix}_adv_genre")
@@ -159,39 +165,81 @@ def render_advanced_search_tab(prefix):
         if selected_genre != "Select a Genre...":
             filtered_df = movies[movies['genres'].str.contains(selected_genre, na=False, case=False)]
             search_triggered = True
+            current_search_key = f"genre_{selected_genre}"
 
     elif search_method == "🎬 Find by Actor/Actress":
-        # Extract, split, and clean all unique actors from your dataset automatically
         all_actors = ["Select an Actor/Actress..."] + sorted(list(set([actor.strip() for sublist in movies['cast'].dropna().str.split(',') for actor in sublist])))
         selected_actor = st.selectbox("Pick an Actor/Actress", all_actors, key=f"{prefix}_adv_cast")
         
         if selected_actor != "Select an Actor/Actress...":
             filtered_df = movies[movies['cast'].str.contains(selected_actor, na=False, case=False)]
             search_triggered = True
+            current_search_key = f"actor_{selected_actor}"
 
     elif search_method == "🎥 Find by Director":
-        # Extract, split, and clean all unique directors from your dataset automatically
         all_directors = ["Select a Director..."] + sorted(list(set([dir_name.strip() for sublist in movies['director'].dropna().str.split(',') for dir_name in sublist])))
         selected_director = st.selectbox("Pick a Director", all_directors, key=f"{prefix}_adv_director")
         
         if selected_director != "Select a Director...":
             filtered_df = movies[movies['director'].str.contains(selected_director, na=False, case=False)]
             search_triggered = True
+            current_search_key = f"director_{selected_director}"
+
+    # Reset page back to 0 if the user switches to a completely different search value
+    if current_search_key != st.session_state[f"{prefix}_previous_search"]:
+        st.session_state[f"{prefix}_current_page"] = 0
+        st.session_state[f"{prefix}_previous_search"] = current_search_key
 
     st.divider()
     
-    # 3. Layout Rendering Engine
+    # 4. Pagination Core Math Engine
     if not search_triggered:
         st.info("💡 Select an option from the dropdown menu above to display matching movies instantly!")
     else:
         total_results = len(filtered_df)
+        
         if total_results > 0:
-            st.markdown(f"📊 Found **{total_results}** matching results:")
+            items_per_page = 20
             
-            # Show all matching rows safely using your scrolling chunk grid
-            selected = render_movie_grid(filtered_df.reset_index(drop=True), f"{prefix}_search_grid")
+            # Calculate total pages needed (e.g., 45 movies / 20 = 3 pages total)
+            import math
+            total_pages = math.ceil(total_results / items_per_page)
+            current_page = st.session_state[f"{prefix}_current_page"]
+            
+            # Calculate the row boundaries for the current active slice page
+            start_idx = current_page * items_per_page
+            end_idx = min(start_idx + items_per_page, total_results)
+            
+            # Slice our dataframe down to just the 20 target movies for this page
+            page_df = filtered_df.iloc[start_idx:end_idx].reset_index(drop=True)
+            
+            st.markdown(f"📊 Showing results **{start_idx + 1} - {end_idx}** of **{total_results}**:")
+            
+            # Display our 20 page entries using your flexible chunk grid function
+            selected = render_movie_grid(page_df, f"{prefix}_page_{current_page}")
             if selected is not None:
                 show_movie(selected)
+                
+            st.write("") # Spacer before pagination control buttons
+            st.divider()
+            
+            # 5. Page Navigation Controller Buttons
+            col_left, col_mid, col_right = st.columns([1, 2, 1])
+            
+            with col_left:
+                # Disable the Back button if we are on the first page
+                if st.button("⬅️ Previous Page", use_container_width=True, disabled=(current_page == 0), key=f"{prefix}_btn_prev"):
+                    st.session_state[f"{prefix}_current_page"] -= 1
+                    st.rerun()
+                    
+            with col_mid:
+                st.markdown(f"<p style='text-align: center; color: gray;'>Page {current_page + 1} of {total_pages}</p>", unsafe_html=True)
+                
+            with col_right:
+                # Disable the Next button if we are on the final page
+                if st.button("Next Page ➡️", use_container_width=True, disabled=(current_page >= total_pages - 1), key=f"{prefix}_btn_next"):
+                    st.session_state[f"{prefix}_current_page"] += 1
+                    st.rerun()
         else:
             st.warning("🕵️ No matches found for this selection.")
 
