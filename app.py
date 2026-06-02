@@ -196,7 +196,7 @@ if st.session_state.mode == "home":
                     st.html("<div style='min-height: 10px;'></div>")
                     
                     # E. A distinct, clearly visible action button
-                    if st.button("🎬 View Info", key=f"trend_{idx}", use_container_width=True, type="secondary"):
+                    if st.button("ℹ️ Info", key=f"trend_{idx}", use_container_width=True, type="secondary"):
                         show_movie(row)
                     
     except Exception as e:
