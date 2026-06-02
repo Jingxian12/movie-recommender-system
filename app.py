@@ -197,15 +197,10 @@ if st.session_state.mode == "home":
     st.subheader("🔥 Explore Trending Movies Right Now")
     
     try:
-        # 1. Filter out movies with very few votes to maintain quality control
-        min_votes = 2000
-        qualified_movies = movies[movies["vote_count"] >= min_votes]
-        
-        # 2. Sort primarily by popularity, secondarily by vote_count
-        hot_movies = qualified_movies.sort_values(by=["popularity", "vote_count"], ascending=[False, False]).head(5)
+        new_movies = movies.sort_values(by=["release_date","popularity"], ascending=[False, False]).head(5)
     
        # 3. Call the function
-        clicked_trending = render_movie_grid(hot_movies, "trend")
+        clicked_trending = render_movie_grid(new_movies, "trend")
         if clicked_trending is not None:
             show_movie(clicked_trending)
                     
