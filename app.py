@@ -102,20 +102,34 @@ if st.session_state.mode == "home":
                 st.rerun()
 
     st.divider()
+    # Trending Movie Poster 
     st.subheader("🔥 Explore Trending Movies Right Now")
     
     try:
-        sort_col = "views" if "views" in movies.columns else ("vote_count" if "vote_count" in movies.columns else None)
-        hot_movies = movies.sort_values(by=sort_col, ascending=False).head(5) if sort_col else movies.sample(5)
+        # 1. Filter out movies with very few votes to maintain quality control
+        min_votes = 2000
+        qualified_movies = movies[movies["vote_count"] >= min_votes]
         
+        # 2. Sort primarily by popularity, secondarily by vote_count
+        hot_movies = qualified_movies.sort_values(by=["popularity", "vote_count"], ascending=[False, False]).head(5)
+    
         poster_cols = st.columns(5)
         for idx, (_, row) in enumerate(hot_movies.iterrows()):
             with poster_cols[idx]:
                 poster = row["poster_url"] if str(row["poster_url"]) != "nan" else "https://placeholder.com"
                 st.image(poster, use_container_width=True)
-                st.caption(f"**{row['title']}**")
-    except Exception:
+                
+                # --- KEY IMPLEMENTATION HERE ---
+                # Use the title as a button. When clicked, it calls your show_movie function.
+                # We add key=f"trend_{idx}" so Streamlit can track each unique button.
+                if st.button(row['title'], key=f"trend_{idx}", use_container_width=True):
+                    show_movie(row)
+                    
+    except Exception as e:
+        # Optional: print the error to your terminal during development to debug issues
+        print(f"Error on trending section: {e}")
         pass
+
 
 # =========================
 # 2. LOGIN MODE
