@@ -63,15 +63,48 @@ def logout():
         del st.session_state.user_id
 
 def render_movie_grid(movie_df, key_prefix):
-    """Helper method to clean up repetitive grid generation code"""
-    selected = None
-    cols = st.columns(5)
-    for i, row in movie_df.iterrows():
-        with cols[i % 5]:
-            st.image(row["poster_url"], use_container_width=True)
-            if st.button(row["title"], key=f"{key_prefix}_{i}"):
-                selected = row
-    return selected
+    """
+    Renders a standard 5-column grid of movie cards inside bordered containers.
+    Returns the movie row if its 'Info' button is clicked, otherwise returns None.
+    """
+    selected_movie = None
+    
+    # Ensure we don't try to render more columns than we have data for
+    num_movies = len(movie_df)
+    if num_movies == 0:
+        return None
+        
+    # Create exactly 5 columns for layout uniformity
+    poster_cols = st.columns(5)
+    
+    for idx, (_, row) in enumerate(movie_df.iterrows()):
+        # Use modulo to wrap elements if the dataframe has more than 5 movies
+        col_idx = idx % 5
+        
+        with poster_cols[col_idx]:
+            # Distinct structural frame around each movie card
+            with st.container(border=True):
+                
+                # A. Show the movie poster
+                poster = row["poster_url"] if str(row["poster_url"]) != "nan" else "https://placeholder.com"
+                st.image(poster, use_container_width=True)
+                
+                # B. Clean, bold title
+                st.markdown(f"**{row['title']}**")
+                
+                # C. Metadata subtext (Rating badge)
+                rating = row.get("vote_average", "N/A")
+                st.caption(f"⭐ {rating} / 10")
+                
+                # D. Structural spacing filler to keep layout lengths balanced
+                st.html("<div style='min-height: 10px;'></div>")
+                
+                # E. Distinct action button
+                # We combine key_prefix and idx to ensure every button across the app has a unique identifier
+                if st.button("🎬 Info", key=f"{key_prefix}_{idx}", use_container_width=True, type="secondary"):
+                    selected_movie = row
+
+    return selected_movie
 
 def render_similar_mix_tab(prefix):
     """Reusable Component for Tab 2: Content-Based Matching"""
@@ -171,33 +204,10 @@ if st.session_state.mode == "home":
         # 2. Sort primarily by popularity, secondarily by vote_count
         hot_movies = qualified_movies.sort_values(by=["popularity", "vote_count"], ascending=[False, False]).head(5)
     
-        # Create the 5-column grid layout
-        poster_cols = st.columns(5)
-        
-        for idx, (_, row) in enumerate(hot_movies.iterrows()):
-            with poster_cols[idx]:
-                # This creates a beautiful distinct frame around the content
-                with st.container(border=True):
-                    
-                    # A. Show the movie poster
-                    poster = row["poster_url"] if str(row["poster_url"]) != "nan" else "https://placeholder.com"
-                    st.image(poster, use_container_width=True)
-                    
-                    # B. Clean, bold title
-                    st.markdown(f"**{row['title']}**")
-                    
-                    # C. Tiny, useful metadata subtext (Rating badge)
-                    # Safeguard in case vote_average is missing
-                    rating = row.get("vote_average", "N/A")
-                    st.caption(f"⭐ {rating} / 10")
-                    
-                    # D. THE FIX: Invisible structural filler that forces the button 
-                    # to stay glued to the bottom of the card regardless of title length
-                    st.html("<div style='min-height: 10px;'></div>")
-                    
-                    # E. A distinct, clearly visible action button
-                    if st.button("ⓘ Info", key=f"trend_{idx}", use_container_width=True, type="secondary"):
-                        show_movie(row)
+       # 3. Call the function
+        clicked_trending = render_movie_grid(hot_movies, "trend")
+        if clicked_trending is not None:
+            show_movie(clicked_trending)
                     
     except Exception as e:
         print(f"Error on trending section: {e}")
