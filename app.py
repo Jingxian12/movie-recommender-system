@@ -206,7 +206,7 @@ if st.session_state.mode == "home":
         movies["release_date_dt"] = pd.to_datetime(movies["release_date"], dayfirst=True,errors="coerce")
         
         # 2. Quality Control: Filter out unreleased or obscure movies
-        min_votes_for_new = 500 
+        min_votes_for_new = 5000 
         qualified_new = movies[movies["vote_count"] >= min_votes_for_new]
         
         # 3. Multi-tiered Sort: Sort primarily by newest date, secondarily by popularity
