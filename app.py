@@ -49,7 +49,7 @@ def show_movie(movie):
         st.write("**Overview:**", get_clean_val(movie["overview"]))
         st.write("**Cast:**", get_clean_val(movie["cast"]))
         st.write("**Director:**", get_clean_val(movie["director"]))
-        st.write("**Rating:**", get_clean_val(movie["vote_average"], " / 10"))
+        st.write("**Production Companies:**", get_clean_val(movie["production_companies"]))
         # Automatically adds " mins" if the runtime exists, otherwise says "Not Available"
         st.write("**Runtime:**", get_clean_val(movie["runtime"], " mins"))
         st.write("**Release Date:**", get_clean_val(movie["release_date"]))
