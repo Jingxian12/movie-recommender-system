@@ -249,7 +249,7 @@ elif st.session_state.mode == "login":
 elif st.session_state.mode == "user":
     col1, col2 = st.columns([8, 1])
     with col1:
-        if st.button("👤 Login Page"):
+        if st.button("🙍🏻‍♂️ Login Page"):
             st.session_state.mode = "home"
             st.rerun()
     with col2:
