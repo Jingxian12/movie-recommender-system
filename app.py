@@ -113,25 +113,37 @@ if st.session_state.mode == "home":
         # 2. Sort primarily by popularity, secondarily by vote_count
         hot_movies = qualified_movies.sort_values(by=["popularity", "vote_count"], ascending=[False, False]).head(5)
     
+        # Create the 5-column grid layout
         poster_cols = st.columns(5)
+        
         for idx, (_, row) in enumerate(hot_movies.iterrows()):
             with poster_cols[idx]:
-                # --- KEY IMPLEMENTATION: Wrap the content in a bordered container ---
+                # This creates a beautiful distinct frame around the content
                 with st.container(border=True):
+                    
+                    # A. Show the movie poster
                     poster = row["poster_url"] if str(row["poster_url"]) != "nan" else "https://placeholder.com"
                     st.image(poster, use_container_width=True)
                     
-                    # --- KEY IMPLEMENTATION HERE ---
-                    # Use the title as a button. When clicked, it calls your show_movie function.
-                    # We add key=f"trend_{idx}" so Streamlit can track each unique button.
-                    if st.button(row['title'], key=f"trend_{idx}", use_container_width=True):
+                    # B. Clean, bold title
+                    st.markdown(f"**{row['title']}**")
+                    
+                    # C. Tiny, useful metadata subtext (Rating badge)
+                    # Safeguard in case vote_average is missing
+                    rating = row.get("vote_average", "N/A")
+                    st.caption(f"⭐ {rating} / 10")
+                    
+                    # D. THE FIX: Invisible structural filler that forces the button 
+                    # to stay glued to the bottom of the card regardless of title length
+                    st.html("<div style='min-height: 10px;'></div>")
+                    
+                    # E. A distinct, clearly visible action button
+                    if st.button("🎬 View Info", key=f"trend_{idx}", use_container_width=True, type="secondary"):
                         show_movie(row)
                     
     except Exception as e:
-        # Optional: print the error to your terminal during development to debug issues
         print(f"Error on trending section: {e}")
         pass
-
 
 # =========================
 # 2. LOGIN MODE
