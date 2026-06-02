@@ -198,12 +198,12 @@ if st.session_state.mode == "home":
                 st.rerun()
 
     st.divider()
-    # Trending Movie Poster 
+    # Latest Movie Poster 
     st.subheader("✨ Latest Hits & New Releases")
     
     try:
         # 1. Ensure the release_date column is in datetime format so pandas can sort it correctly
-        movies["release_date_dt"] = pd.to_datetime(movies["release_date"], errors="coerce")
+        movies["release_date_dt"] = pd.to_datetime(movies["release_date"], dayfirst=True,errors="coerce")
         
         # 2. Quality Control: Filter out unreleased or obscure movies
         min_votes_for_new = 500 
