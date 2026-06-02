@@ -1,10 +1,15 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import pickle
-import gzip
 
-from sklearn.metrics.pairwise import cosine_similarity
+# Import functions from our newly created module
+from recommender_models import (
+    load_data, 
+    load_models, 
+    recommend_cf, 
+    recommend_content, 
+    recommend_semantic
+)
 
 # =========================
 # PAGE CONFIG
@@ -12,57 +17,32 @@ from sklearn.metrics.pairwise import cosine_similarity
 st.set_page_config(page_title="MovieMatch", layout="wide")
 
 st.title("🎬 Hybrid Movie Recommender System")
-st.write("Welcome to MovieMatch! Log in with your User ID to unlock personalized recommendations based on your unique rating history, or jump straight into Guest Mode to explore movies by matching your favorite vibes and descriptions.")
+st.write("Welcome to MovieMatch! Log in with your User ID to unlock personalized recommendations or use Guest Mode.")
 st.divider()
 
 # =========================
-# LOAD DATA
+# INITIALIZE DATA & MODELS
 # =========================
-movies = pd.read_csv("dataset/tmdb_clean.csv")
-ratings = pd.read_csv("dataset/ratings_clean.csv")
-links = pd.read_csv("dataset/movieLens.csv")
+# Cache data/models so they don't reload on every button click/refresh
+@st.cache_data
+def get_cached_data():
+    return load_data()
+
+@st.cache_resource
+def get_cached_models():
+    return load_models()
+
+movies, user_item_matrix = get_cached_data()
+item_topk, content_topk, embeddings = get_cached_models()
 
 # =========================
-# BUILD MAPPING 
+# MOVIE DETAILS UI DIALOG
 # =========================
-ratings = ratings.merge(links[["movieId", "tmdbId"]], on="movieId")
-ratings = ratings.merge(movies, on="tmdbId")
-
-# =========================
-# USER-ITEM MATRIX
-# =========================
-user_item_matrix = ratings.pivot_table(
-    index="userId",
-    columns="tmdbId",
-    values="rating"
-).fillna(0)
-
-# =========================
-# LOAD MODELS
-# =========================
-# ITEM SIMILIARITY
-with gzip.open("models/cf/item_topk.pkl.gz", "rb") as f:
-    item_topk = pickle.load(f)
-
-# TF-IDF (KEY FIX: should be tmdbId-based)
-with gzip.open("models/content/tfidf_topk.pkl.gz", "rb") as f:
-    content_topk = pickle.load(f)
-
-# SBERT embeddings
-with gzip.open("models/nlp/sbert_embeddings.pkl.gz", "rb") as f:
-    embeddings = pickle.load(f)
-
-# =========================
-# MOVIE DETAILS UI
-# =========================
-@st.dialog("🎬 Movie Details",width="large")
+@st.dialog("🎬 Movie Details", width="large")
 def show_movie(movie):
-
-    col1, col2 = st.columns([1,2])
-
+    col1, col2 = st.columns([1, 2])
     with col1:
         st.image(movie["poster_url"], use_container_width=True)
-
     with col2:
         st.subheader(movie["title"])
         st.write("**Genres:**", movie["genres"])
@@ -72,66 +52,43 @@ def show_movie(movie):
         st.write("**Rating:**", movie["vote_average"])
         st.write("**Runtime:**", movie["runtime"])
         st.write("**Release Date:**", movie["release_date"])
-        
-# =========================
-# CF FUNCTION
-# =========================
-def recommend_cf(user_id):
-    # Fallback Mechanism
-    if user_id not in user_item_matrix.index:
-        return movies.sample(5)
-
-    user_ratings = user_item_matrix.loc[user_id]
-    watched = user_ratings[user_ratings > 0].index
-    scores = {}
-    for movie in watched:
-        if movie in item_topk:
-            for neighbor, sim in item_topk[movie]:
-                scores[neighbor] = scores.get(neighbor, 0) + sim
-
-    ranked = sorted(scores.items(), key=lambda x: x[1], reverse=True)
-
-    rec_tmdb = [i[0] for i in ranked[:5]]
-
-    return movies[movies["tmdbId"].isin(rec_tmdb)]
 
 
 # =========================
-# LOGOUT FUNCTION
+# HELPER ACTIONS
 # =========================
 def logout():
     st.session_state.mode = "home"
-
     if "user_id" in st.session_state:
         del st.session_state.user_id
 
+def render_movie_grid(movie_df, key_prefix):
+    """Helper method to clean up repetitive grid generation code"""
+    selected = None
+    cols = st.columns(5)
+    for i, row in movie_df.iterrows():
+        with cols[i % 5]:
+            st.image(row["poster_url"], use_container_width=True)
+            if st.button(row["title"], key=f"{key_prefix}_{i}"):
+                selected = row
+    return selected
+
 
 # =========================
-# SESSION STATE
+# SESSION STATE CONTROL
 # =========================
 if "mode" not in st.session_state:
     st.session_state.mode = "home"
 
 # =========================
-# HOME
+# 1. HOME MODE
 # =========================
 if st.session_state.mode == "home":
-    
-    # 1. Feature Showcases (2-Column Modern Grid Layout)
     col1, col2 = st.columns(2, gap="large")
-    
     with col1:
-        # st.container(border=True) creates a beautiful modern card shadow box
         with st.container(border=True):
             st.markdown("### 🔐 Personalized Experience")
-            st.markdown(
-                """
-                * 📈 **Collaborative Filtering**: Analyzes your historical ratings.
-                * 🎯 **Predictive Scoring**: Guessing what you will love next.
-                * 📂 **Viewing History**: Track and sync your personal watchlist.
-                """
-            )
-            # Primary button makes it pop as the main call to action
+            st.markdown("- 📈 **Collaborative Filtering**: History analysis.\n- 🎯 **Predictive Scoring**: Guessing your favorites.")
             if st.button("Log In to Your Profile", use_container_width=True, type="primary"):
                 st.session_state.mode = "login"
                 st.rerun()
@@ -139,44 +96,29 @@ if st.session_state.mode == "home":
     with col2:
         with st.container(border=True):
             st.markdown("### 🚀 Quick Guest Mode")
-            st.markdown(
-                """
-                * 📄 **Content-Based Discovery**: Find movies by keywords & vibes.
-                * 🎭 **Genre & Mood Explorer**: Filter by themes you feel like today.
-                * 🍿 **Instant Results**: No account needed, jump straight in.
-                """
-            )
+            st.markdown("- 📄 **Content-Based Discovery**: Keywords & vibes.\n- 🍿 **Instant Results**: No account needed.")
             if st.button("Continue as Guest", use_container_width=True):
                 st.session_state.mode = "guest"
                 st.rerun()
 
     st.divider()
-
-    # 2. Bottom Carousel: Hook the user immediately with beautiful movie posters
     st.subheader("🔥 Explore Trending Movies Right Now")
     
-    if 'movies' in locals() or 'movies' in globals():
-        try:
-            # Smart sorting based on whatever columns you have available
-            if "views" in movies.columns:
-                hot_movies = movies.sort_values(by="views", ascending=False).head(5)
-            elif "vote_count" in movies.columns:
-                hot_movies = movies.sort_values(by="vote_count", ascending=False).head(5)
-            else:
-                hot_movies = movies.sample(5)
-                
-            # Render a 5-column grid for movie posters
-            poster_cols = st.columns(5)
-            for idx, (_, row) in enumerate(hot_movies.iterrows()):
-                with poster_cols[idx]:
-                    poster = row["poster_url"] if str(row["poster_url"]) != "nan" else "https://placeholder.com"
-                    st.image(poster, use_container_width=True)
-                    # Use captions for titles to keep the layout lightweight
-                    st.caption(f"**{row['title']}**")
-        except Exception:
-            pass # Failsafe to ensure your home page never crashes due to column mismatch
+    try:
+        sort_col = "views" if "views" in movies.columns else ("vote_count" if "vote_count" in movies.columns else None)
+        hot_movies = movies.sort_values(by=sort_col, ascending=False).head(5) if sort_col else movies.sample(5)
+        
+        poster_cols = st.columns(5)
+        for idx, (_, row) in enumerate(hot_movies.iterrows()):
+            with poster_cols[idx]:
+                poster = row["poster_url"] if str(row["poster_url"]) != "nan" else "https://placeholder.com"
+                st.image(poster, use_container_width=True)
+                st.caption(f"**{row['title']}**")
+    except Exception:
+        pass
+
 # =========================
-# LOGIN
+# 2. LOGIN MODE
 # =========================
 elif st.session_state.mode == "login":
     col1, col2 = st.columns([1, 6])
@@ -193,10 +135,10 @@ elif st.session_state.mode == "login":
             st.session_state.mode = "user"
             st.rerun()
         else:
-            st.error("❌ User not found. Please try again by enter validID!")
-            
+            st.error("❌ User not found. Please enter a valid ID!")
+
 # =========================
-# USER MODE
+# 3. USER MODE
 # =========================
 elif st.session_state.mode == "user":
     col1, col2 = st.columns([8, 1])
@@ -206,179 +148,64 @@ elif st.session_state.mode == "user":
             st.rerun()
     st.success(f"Welcome User {st.session_state.user_id}")
 
-    tab1, tab2, tab3 = st.tabs([
-        "🏠 CF",
-        "🎥 Content-Based",
-        "🧠 SBERT"
-    ])
+    tab1, tab2, tab3 = st.tabs(["🏠 CF", "🎥 Content-Based", "🧠 SBERT"])
 
-    # =========================
-    # CF TAB
-    # =========================
     with tab1:
         st.header("Personalized Recommendations")
-        recs = recommend_cf(st.session_state.user_id).reset_index(drop=True)
-        selected = None
-        cols = st.columns(5)
-
-        for i, row in recs.iterrows():
-            with cols[i % 5]:
-                st.image(row["poster_url"], use_container_width=True)
-                if st.button(row["title"], key=f"cf_{i}"):
-                    selected = row
+        recs = recommend_cf(st.session_state.user_id, user_item_matrix, item_topk, movies).reset_index(drop=True)
+        selected = render_movie_grid(recs, "cf")
         if selected is not None:
-            st.divider()
             show_movie(selected)
 
-    # =========================
-    # TF-IDF TAB (FIXED KEY ERROR)
-    # =========================
     with tab2:
-
         st.header("Similar Movies (Content-Based)")
-
-        movie = st.selectbox("Select Movie", movies["title"])
-
-        if st.button("Recommend"):
-            # 1. 提取原始 tmdbId
-            raw_id = movies[movies["title"] == movie]["tmdbId"].values[0]
-            
-            # 2. 强制转换为整数（防止出现 862.0 这种浮点数导致匹配失败）
-            tmdb_id_int = int(float(raw_id))
-            
-            # 3. 核心修复：直接用整数去字典里查找
-            if tmdb_id_int not in content_topk:
+        movie = st.selectbox("Select Movie", movies["title"], key="user_cb_select")
+        if st.button("Recommend", key="user_cb_btn"):
+            rec_movies = recommend_content(movie, content_topk, movies)
+            if rec_movies is None or rec_movies.empty:
                 st.error("No recommendations found")
             else:
-                rec_list = content_topk[tmdb_id_int]
-
-                # 4. 获取推荐电影的 ID 列表（确保里面的 ID 也都是整数类型）
-                rec_tmdb = [int(float(i[0])) for i in rec_list]
-                
-                # 5. 过滤出推荐的电影数据，同时确保 DataFrame 的列也转为 int 匹配
-                rec_movies = movies[movies["tmdbId"].astype(float).astype(int).isin(rec_tmdb)].reset_index(drop=True)
-
-                selected = None
-                cols = st.columns(5)
-
-                for i, row in rec_movies.iterrows():
-                    with cols[i % 5]:
-                        st.image(row["poster_url"], use_container_width=True)
-                        if st.button(row["title"], key=f"tfidf_{i}"):
-                              selected = row
-
+                selected = render_movie_grid(rec_movies, "tfidf")
                 if selected is not None:
-                    st.divider()
                     show_movie(selected)
 
-    # =========================
-    # SBERT TAB (FIXED ID USAGE)
-    # =========================
     with tab3:
-
         st.header("Semantic Search")
-
-        query = st.text_area("Describe a movie")
-
-        if st.button("Search"):
-
-            q_vec = np.array(embeddings)  # assuming precomputed similarity-ready embeddings
-
-            scores = cosine_similarity(q_vec[:1], embeddings)[0]
-
-            top_k = np.argsort(scores)[::-1][:10]
-
-            results = movies.iloc[top_k].reset_index(drop=True)
-
-            selected = None
-            cols = st.columns(5)
-
-            for i, row in results.iterrows():
-
-                with cols[i % 5]:
-                    st.image(row["poster_url"], use_container_width=True)
-
-                    if st.button(row["title"], key=f"sbert_{i}"):
-                        selected = row
-
+        query = st.text_area("Describe a movie", key="user_sb_query")
+        if st.button("Search", key="user_sb_btn"):
+            results = recommend_semantic(query, embeddings, movies)
+            selected = render_movie_grid(results, "sbert")
             if selected is not None:
-                st.divider()
                 show_movie(selected)
 
 # =========================
-# GUEST MODE
+# 4. GUEST MODE
 # =========================
 elif st.session_state.mode == "guest":
     col1, col2 = st.columns([8, 1])
-
     with col2:
         if st.button("🏠 Home"):
             logout()
             st.rerun()
 
     st.title("🎥 Guest Mode")
-
-    tab1, tab2 = st.tabs([
-        "🎥 Content-Based",
-        "🧠 SBERT"
-    ])
+    tab1, tab2 = st.tabs(["🎥 Content-Based", "🧠 SBERT"])
 
     with tab1:
-
-        movie = st.selectbox("Select Movie", movies["title"])
-
-        if st.button("Recommend"):
-
-            tmdb_id = movies[movies["title"] == movie]["tmdbId"].values[0]
-
-            if str(tmdb_id) not in content_topk:
+        movie = st.selectbox("Select Movie", movies["title"], key="guest_cb_select")
+        if st.button("Recommend", key="guest_cb_btn"):
+            rec_movies = recommend_content(movie, content_topk, movies)
+            if rec_movies is None or rec_movies.empty:
                 st.error("No recommendations found")
             else:
-                rec_list = content_topk[str(tmdb_id)]
-
-                rec_tmdb = [i[0] for i in rec_list]
-                rec_movies = movies[movies["tmdbId"].isin(rec_tmdb)].reset_index(drop=True)
-
-                selected = None
-                cols = st.columns(5)
-
-                for i, row in rec_movies.iterrows():
-
-                    with cols[i % 5]:
-                        st.image(row["poster_url"], use_container_width=True)
-
-                        if st.button(row["title"], key=f"g_tf_{i}"):
-                            selected = row
-
+                selected = render_movie_grid(rec_movies, "g_tf")
                 if selected is not None:
-                    st.divider()
                     show_movie(selected)
 
     with tab2:
-
-        query = st.text_area("Describe a movie")
-
-        if st.button("Search"):
-
-            q_vec = np.array(embeddings)
-
-            scores = cosine_similarity(q_vec[:1], embeddings)[0]
-
-            top_k = np.argsort(scores)[::-1][:10]
-
-            results = movies.iloc[top_k].reset_index(drop=True)
-
-            selected = None
-            cols = st.columns(5)
-
-            for i, row in results.iterrows():
-
-                with cols[i % 5]:
-                    st.image(row["poster_url"], use_container_width=True)
-
-                    if st.button(row["title"], key=f"g_sb_{i}"):
-                        selected = row
-
+        query = st.text_area("Describe a movie", key="guest_sb_query")
+        if st.button("Search", key="guest_sb_btn"):
+            results = recommend_semantic(query, embeddings, movies)
+            selected = render_movie_grid(results, "g_sb")
             if selected is not None:
-                st.divider()
                 show_movie(selected)
