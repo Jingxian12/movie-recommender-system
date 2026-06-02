@@ -43,7 +43,8 @@ def show_movie(movie):
             if pd.isna(val) or str(val).strip().lower() in ["nan", "none", ""]:
                 return "Not Available"
             return f"{val}{suffix}"
-
+            
+        st.write("**Title:**", get_clean_val(movie["title"]))
         st.write("**Genres:**", get_clean_val(movie["genres"]))
         st.write("**Overview:**", get_clean_val(movie["overview"]))
         st.write("**Cast:**", get_clean_val(movie["cast"]))
