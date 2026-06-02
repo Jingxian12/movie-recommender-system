@@ -202,7 +202,7 @@ if st.session_state.mode == "home":
         
         # 2. Quality Control: Filter out unreleased or obscure movies
         min_votes_for_new = 500 
-        qualified_new = movies[movies["vote_count"] >= min_votes_for_new
+        qualified_new = movies[movies["vote_count"] >= min_votes_for_new]
         
         # 3. Multi-tiered Sort: Sort primarily by newest date, secondarily by popularity
         latest_movies = qualified_new.sort_values(by=["release_date_dt", "popularity"], ascending=[False, False]).head(5).reset_index(drop=True)
@@ -210,9 +210,9 @@ if st.session_state.mode == "home":
        # 4. Clean up the temporary datetime column so it doesn't mess up your data profile
         latest_movies = latest_movies.drop(columns=["release_date_dt"])
         
-        clicked_trending = render_movie_grid(latest_movies, "latest")
-        if clicked_trending is not None:
-            show_movie(clicked_trending)
+        clicked_latest = render_movie_grid(latest_movies, "latest")
+        if clicked_latest is not None:
+            show_movie(clicked_latest)
                     
     except Exception as e:
         print(f"Error on trending section: {e}")
