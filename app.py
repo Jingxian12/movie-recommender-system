@@ -233,7 +233,7 @@ def render_advanced_search_tab(prefix):
                     st.rerun()
                     
             with col_mid:
-                st.markdown(f"<p style='text-align: center; color: gray;'>Page {current_page + 1} of {total_pages}</p>", unsafe_html=True)
+                st.markdown(f"<p style='text-align: center; color: gray;'>Page {current_page + 1} of {total_pages}</p>", unsafe_allow_html=True)
                 
             with col_right:
                 # Disable the Next button if we are on the final page
