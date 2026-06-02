@@ -94,6 +94,11 @@ def render_movie_grid(movie_df, key_prefix):
                 
                 # C. Metadata subtext (Rating badge)
                 rating = row.get("vote_average", "N/A")
+                if pd.notna(rating_raw) and isinstance(rating_raw, (int, float)): # Check if the rating is a valid number before formatting it
+                    rating = f"{float(rating_raw):.1f}"
+                else:
+                    rating = "N/A"
+                
                 st.caption(f"⭐ {rating} / 10")
                 
                 # D. Structural spacing filler to keep layout lengths balanced
