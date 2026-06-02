@@ -210,7 +210,7 @@ if st.session_state.mode == "home":
         qualified_new = movies[movies["vote_count"] >= min_votes_for_new]
         
         # 3. Multi-tiered Sort: Sort primarily by newest date, secondarily by popularity
-        latest_movies = qualified_new.sort_values(by=["release_date_dt", "popularity"], ascending=[False, False]).head(5).reset_index(drop=True)
+        latest_movies = qualified_new.sort_values(by="release_date_dt", ascending=False).head(5).reset_index(drop=True)
     
        # 4. Clean up the temporary datetime column so it doesn't mess up your data profile
         latest_movies = latest_movies.drop(columns=["release_date_dt"])
