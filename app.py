@@ -40,7 +40,7 @@ item_topk, content_topk, embeddings = get_cached_models()
 # =========================
 @st.dialog("🎬 Movie Details", width="large")
 def show_movie(movie):
-    col1, col2 = st.columns([1, 2])
+    col1, col2 = st.columns([1, 2]) # col1 : image / col2 : information
     with col1:
         st.image(movie["poster_url"], use_container_width=True)
     with col2:
@@ -93,17 +93,30 @@ if st.session_state.mode == "home":
     col1, col2 = st.columns(2, gap="large")
     with col1:
         with st.container(border=True):
-            st.markdown("### 🔐 Personalized Experience")
-            st.markdown("- 📈 **Collaborative Filtering**: History analysis.\n- 🎯 **Predictive Scoring**: Guessing your favorites.")
-            if st.button("Log In to Your Profile", use_container_width=True, type="primary",icon="🚨"):
+            st.markdown("### 🔐 For Returning Members")
+            st.markdown(
+                """
+                * 📈 **Made For You**: Get smart picks based on movies you've already rated.
+                * 🎯 **Smart Predictions**: The more you rate, the better our guesses get.
+                * 📂 **Saved History**: Keep track of your personal viewing history.
+                """
+            )
+            # Changed icon to 🔑 (key) or omitted 🚨 since "🚨" means danger/alert
+            if st.button("Log In to Your Profile", use_container_width=True, type="primary", icon="🔑"):
                 st.session_state.mode = "login"
                 st.rerun()
 
     with col2:
         with st.container(border=True):
             st.markdown("### 🚀 Quick Guest Mode")
-            st.markdown("- 📄 **Content-Based Discovery**: Keywords & vibes.\n- 🍿 **Instant Results**: No account needed.")
-            if st.button("Continue as Guest", use_container_width=True):
+            st.markdown(
+                """
+                * 📄 **Search by Vibe**: Find movies by matching descriptions, moods, or keywords.
+                * 🎭 **Instant Mix**: Pick a favorite film and instantly see choices just like it.
+                * 🍿 **Zero Setup**: No account or password needed—just jump straight in!
+                """
+            )
+            if st.button("Continue as Guest", use_container_width=True, icon="👋"):
                 st.session_state.mode = "guest"
                 st.rerun()
 
