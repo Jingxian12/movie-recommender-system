@@ -44,15 +44,21 @@ def show_movie(movie):
     with col1:
         st.image(movie["poster_url"], use_container_width=True)
     with col2:
-        st.subheader(movie["title"])
-        st.write("**Genres:**", movie["genres"])
-        st.write("**Overview:**", movie["overview"])
-        st.write("**Cast:**", movie["cast"])
-        st.write("**Director:**", movie["director"])
-        st.write("**Rating:**", movie["vote_average"])
-        st.write("**Runtime:**", movie["runtime"])
-        st.write("**Release Date:**", movie["release_date"])
+        # Safe formatting helper function
+        def get_clean_val(val, suffix=""):
+            # Checks if value is NaN, None, or an empty string
+            if pd.isna(val) or str(val).strip().lower() in ["nan", "none", ""]:
+                return "Not Available"
+            return f"{val}{suffix}"
 
+        st.write("**Genres:**", get_clean_val(movie["genres"]))
+        st.write("**Overview:**", get_clean_val(movie["overview"]))
+        st.write("**Cast:**", get_clean_val(movie["cast"]))
+        st.write("**Director:**", get_clean_val(movie["director"]))
+        st.write("**Rating:**", get_clean_val(movie["vote_average"], " / 10"))
+        # Automatically adds " mins" if the runtime exists, otherwise says "Not Available"
+        st.write("**Runtime:**", get_clean_val(movie["runtime"], " mins"))
+        st.write("**Release Date:**", get_clean_val(movie["release_date"]))
 
 # =========================
 # HELPER ACTIONS
