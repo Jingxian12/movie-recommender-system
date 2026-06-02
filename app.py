@@ -2,14 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 
-# Import functions from our newly created module
-from recommender_models import (
-    load_data, 
-    load_models, 
-    recommend_cf, 
-    recommend_content, 
-    recommend_semantic
-)
+from recommender_models import (load_data, load_models, recommend_cf, recommend_content, recommend_semantic)
 
 # =========================
 # PAGE CONFIG
@@ -79,6 +72,52 @@ def render_movie_grid(movie_df, key_prefix):
                 selected = row
     return selected
 
+def render_similar_mix_tab(prefix):
+    """Reusable Component for Tab 2: Content-Based Matching"""
+    st.header("🎥 Similar Mix")
+    st.caption("Select a movie you love to find others built with a similar recipe.")
+    
+    movie = st.selectbox("Select Movie", movies["title"], key=f"{prefix}_cb_select")
+    if st.button("Find Matches", key=f"{prefix}_cb_btn"):
+        rec_movies = recommend_content(movie, content_topk, movies)
+        if rec_movies is None or rec_movies.empty:
+            st.error("No matches found in our database.")
+        else:
+            selected = render_movie_grid(rec_movies, f"{prefix}_tfidf")
+            if selected is not None:
+                show_movie(selected)
+
+
+def render_search_vibe_tab(prefix):
+    """Reusable Component for Tab 3: NLP Semantic Search"""
+    st.header("🧠 Search by Vibe")
+    st.caption("Describe your ideal movie vibe, mood, or plot elements in everyday words.")
+    
+    query = st.text_area(
+        "What are you in the mood for?", 
+        key=f"{prefix}_sb_query", 
+        placeholder="e.g., A suspenseful spacesuit thriller with an unexpected twist ending."
+    )
+    if st.button("Search Mood", key=f"{prefix}_sb_btn"):
+        results = recommend_semantic(query, embeddings, movies)
+        selected = render_movie_grid(results, f"{prefix}_sbert")
+        if selected is not None:
+            show_movie(selected)
+
+
+def render_browse_categories_tab(prefix):
+    """Reusable Component for Tab 4: Genre Filtering"""
+    st.header("🎭 Browse Categories")
+    st.caption("Filter our collection down by your favorite genres.")
+    
+    # Safely extract unique categories out of the dataframe string data
+    all_genres = sorted(list(set([g.strip() for sublist in movies['genres'].dropna().str.split(',') for g in sublist])))
+    selected_genre = st.selectbox("Pick a Category", all_genres, key=f"{prefix}_genre_select")
+    
+    genre_filtered = movies[movies['genres'].str.contains(selected_genre, na=False, case=False)].head(5).reset_index(drop=True)
+    selected = render_movie_grid(genre_filtered, f"{prefix}_genre")
+    if selected is not None:
+        show_movie(selected)
 
 # =========================
 # SESSION STATE CONTROL
@@ -182,105 +221,42 @@ elif st.session_state.mode == "login":
             st.rerun()
         else:
             st.error("❌ User not found. Please enter a valid ID!")
-
+            
 # =========================
-# 3. USER MODE (Valid User Page)
+# 3. USER MODE
 # =========================
 elif st.session_state.mode == "user":
     col1, col2 = st.columns([8, 1])
     with col2:
-        if st.button("🚪 Sign Out"):
+        if st.button("🚪 Sign Out", key="user_logout"):
             logout()
             st.rerun()
-    st.success(f"Welcome User {st.session_state.user_id}")
+            
+    st.success(f"Welcome back, User {st.session_state.user_id}!")
 
-    tab1, tab2, tab3 = st.tabs(["🏠 CF", "🎥 Content-Based", "🧠 SBERT"])
+    tab1, tab2, tab3, tab4 = st.tabs([
+        "🏠 Made For You", 
+        "🎥 Similar Mix", 
+        "🧠 Search by Vibe", 
+        "🎭 Browse Categories"
+    ])
 
-# =========================
-    # CF TAB (PERSONALIZED)
-    # =========================
     with tab1:
-        # 1. Fetch the user's historical rating metrics for a personalized greeting
-        user_ratings_all = user_item_matrix.loc[st.session_state.user_id]
-        watched_movies = user_ratings_all[user_ratings_all > 0]
-        total_watched = len(watched_movies)
-        avg_user_rating = round(watched_movies.mean(), 1) if total_watched > 0 else 0
-
-        # Welcome Summary Banner
-        st.markdown(f"### 👋 Welcome back, Explorer!")
-        st.markdown(
-            f"You have rated **{total_watched} movies** with an average score of **{avg_user_rating} ⭐**. "
-            "Based on your unique taste footprint, we have curated these special match categories for you:"
-        )
-
-        # 2. Helpful Context Box
-        st.info(
-            "💡 **How these are chosen:** We found other film lovers who share your exact movie ratings, "
-            "and brought forward the titles they rated highly that you haven't discovered yet!"
-        )
-        
-        st.divider()
-
-        # 3. Fetch recommendations from your model
-        # We fetch a larger pool (e.g., 20 movies) so we can filter and shuffle them!
-        raw_recs = recommend_cf(st.session_state.user_id, user_item_matrix, item_topk, movies)
-        
-        if raw_recs.empty:
-            st.warning("Complete a few more ratings in our system to unlock custom picks!")
-        else:
-            # Action controls row: Let them mix things up
-            col_header, col_btn = st.columns([4, 1])
-            with col_btn:
-                # A shuffle button that triggers a simple UI state rerun
-                shuffle_clicked = st.button("🔄 Shuffle My Picks", use_container_width=True)
-
-            # Row 1: Top Picks (Sorted by highest popularity within your recommended pool)
-            st.markdown("#### 🏆 Your Absolute Top Matches")
-            st.caption("Highly-rated blockbusters that fit your profile perfectly.")
-            
-            top_picks = raw_recs.sort_values(by="popularity", ascending=False).head(5)
-            if shuffle_clicked:
-                top_picks = raw_recs.sample(min(5, len(raw_recs)))
-                
-            selected_top = render_movie_grid(top_picks.reset_index(drop=True), "cf_top")
-            if selected_top is not None:
-                show_movie(selected_top)
-
-            st.write("") # Spacer
-
-            # Row 2: Hidden Gems (Low popularity scores in the dataset, but highly recommended by CF)
-            st.markdown("#### 💎 Underrated Hidden Gems")
-            st.caption("Less mainstream movies that people with your exact taste absolutely loved.")
-            
-            # Grabbing movies with lower popularity metrics to serve as lesser-known gems
-            hidden_gems = raw_recs.sort_values(by="popularity", ascending=True).head(5)
-            if shuffle_clicked:
-                hidden_gems = raw_recs.sample(min(5, len(raw_recs)))
-                
-            selected_gem = render_movie_grid(hidden_gems.reset_index(drop=True), "cf_gem")
-            if selected_gem is not None:
-                show_movie(selected_gem)
+        st.header("Personalized Picks")
+        st.caption("Custom tailored choices calculated from your historical ratings.")
+        recs = recommend_cf(st.session_state.user_id, user_item_matrix, item_topk, movies).reset_index(drop=True)
+        selected = render_movie_grid(recs.head(5), "user_cf")
+        if selected is not None:
+            show_movie(selected)
 
     with tab2:
-        st.header("Similar Movies (Content-Based)")
-        movie = st.selectbox("Select Movie", movies["title"], key="user_cb_select")
-        if st.button("Recommend", key="user_cb_btn"):
-            rec_movies = recommend_content(movie, content_topk, movies)
-            if rec_movies is None or rec_movies.empty:
-                st.error("No recommendations found")
-            else:
-                selected = render_movie_grid(rec_movies, "tfidf")
-                if selected is not None:
-                    show_movie(selected)
+        render_similar_mix_tab(prefix="user")
 
     with tab3:
-        st.header("Semantic Search")
-        query = st.text_area("Describe a movie", key="user_sb_query")
-        if st.button("Search", key="user_sb_btn"):
-            results = recommend_semantic(query, embeddings, movies)
-            selected = render_movie_grid(results, "sbert")
-            if selected is not None:
-                show_movie(selected)
+        render_search_vibe_tab(prefix="user")
+
+    with tab4:
+        render_browse_categories_tab(prefix="user")
 
 # =========================
 # 4. GUEST MODE
@@ -288,28 +264,36 @@ elif st.session_state.mode == "user":
 elif st.session_state.mode == "guest":
     col1, col2 = st.columns([8, 1])
     with col2:
-        if st.button("🏠 Home"):
+        if st.button("🏠 Home", key="guest_home"):
             logout()
             st.rerun()
 
-    st.title("🎥 Guest Mode")
-    tab1, tab2 = st.tabs(["🎥 Content-Based", "🧠 SBERT"])
+    st.title("🎥 Guest Dashboard")
+    st.info("💡 Logging in with a User ID unlocks premium custom tracking and history calculations!")
+
+    tab1, tab2, tab3, tab4 = st.tabs([
+        "🔥 What's Hot", 
+        "🎥 Similar Mix", 
+        "🧠 Search by Vibe", 
+        "🎭 Browse Categories"
+    ])
 
     with tab1:
-        movie = st.selectbox("Select Movie", movies["title"], key="guest_cb_select")
-        if st.button("Recommend", key="guest_cb_btn"):
-            rec_movies = recommend_content(movie, content_topk, movies)
-            if rec_movies is None or rec_movies.empty:
-                st.error("No recommendations found")
-            else:
-                selected = render_movie_grid(rec_movies, "g_tf")
-                if selected is not None:
-                    show_movie(selected)
+        st.header("What's Hot")
+        st.caption("The most famous blockbuster movies actively trending globally right now.")
+        min_votes = 2000
+        qualified = movies[movies["vote_count"] >= min_votes]
+        popular_recs = qualified.sort_values(by=["popularity", "vote_count"], ascending=[False, False]).head(5).reset_index(drop=True)
+        
+        selected = render_movie_grid(popular_recs, "guest_hot")
+        if selected is not None:
+            show_movie(selected)
 
     with tab2:
-        query = st.text_area("Describe a movie", key="guest_sb_query")
-        if st.button("Search", key="guest_sb_btn"):
-            results = recommend_semantic(query, embeddings, movies)
-            selected = render_movie_grid(results, "g_sb")
-            if selected is not None:
-                show_movie(selected)
+        render_similar_mix_tab(prefix="guest")
+
+    with tab3:
+        render_search_vibe_tab(prefix="guest")
+
+    with tab4:
+        render_browse_categories_tab(prefix="guest")
