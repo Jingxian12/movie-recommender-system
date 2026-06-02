@@ -235,11 +235,18 @@ elif st.session_state.mode == "login":
 
     st.subheader("Enter User ID")
     uid = st.text_input("User ID")
-    if st.button("Submit"):
+    
+    # 2. Password input (type="password" hides the characters)
+    password = st.text_input("Password", type="password", placeholder="Enter your password")
+    if st.button("Submit", type="primary", use_container_width=True):
         if uid.isdigit() and int(uid) in user_item_matrix.index:
-            st.session_state.user_id = int(uid)
-            st.session_state.mode = "user"
-            st.rerun()
+            # 4. Check if the password matches "123"
+            if password == "123":
+                st.session_state.user_id = int(uid)
+                st.session_state.mode = "user"
+                st.rerun()
+            else:
+                st.error("❌ Incorrect password. Please try again!")
         else:
             st.error("❌ User not found. Please enter a valid ID!")
             
