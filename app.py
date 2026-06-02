@@ -5,15 +5,6 @@ import numpy as np
 from recommender_models import (load_data, load_models, recommend_cf, recommend_content, recommend_semantic)
 
 # =========================
-# PAGE CONFIG
-# =========================
-st.set_page_config(page_title="MovieMatch", layout="wide")
-
-st.title("🎬 Hybrid Movie Recommender System")
-st.write("Welcome to MovieMatch! Log in with your User ID to unlock personalized recommendations or use Guest Mode.")
-st.divider()
-
-# =========================
 # INITIALIZE DATA & MODELS
 # =========================
 # Cache data/models so they don't reload on every button click/refresh
@@ -64,51 +55,50 @@ def logout():
 
 def render_movie_grid(movie_df, key_prefix):
     """
-    Renders a standard 5-column grid of movie cards inside bordered containers.
-    Returns the movie row if its 'Info' button is clicked, otherwise returns None.
+    Renders a dynamic grid of movie cards wrapped into rows of 5 columns.
     """
-    selected_movie = None
-    
-    # Ensure we don't try to render more columns than we have data for
-    num_movies = len(movie_df)
-    if num_movies == 0:
+    if movie_df.empty:
+        st.info("🔍 No movies found matching your criteria.")
         return None
         
-    # Create exactly 5 columns for layout uniformity
-    poster_cols = st.columns(5)
+    selected_movie = None
+    num_movies = len(movie_df)
     
-    for idx, (_, row) in enumerate(movie_df.iterrows()):
-        # Use modulo to wrap elements if the dataframe has more than 5 movies
-        col_idx = idx % 5
+    # Chunk the dataframe into rows of 5 items each
+    row_size = 5
+    for row_idx in range(0, num_movies, row_size):
+        chunk = movie_df.iloc[row_idx : row_idx + row_size]
         
-        with poster_cols[col_idx]:
-            # Distinct structural frame around each movie card
-            with st.container(border=True):
-                
-                # A. Show the movie poster
-                poster = row["poster_url"] if str(row["poster_url"]) != "nan" else "https://placeholder.com"
-                st.image(poster, use_container_width=True)
-                
-                # B. Clean, bold title
-                st.markdown(f"**{row['title']}**")
-                
-                # C. Metadata subtext (Rating badge)
-                rating_raw = row.get("vote_average", "N/A")
-                if pd.notna(rating_raw) and isinstance(rating_raw, (int, float)): # Check if the rating is a valid number before formatting it
-                    rating = f"{float(rating_raw):.1f}"
-                else:
-                    rating = "N/A"
-                
-                st.caption(f"⭐ {rating} / 10")
-                
-                # D. Structural spacing filler to keep layout lengths balanced
-                st.html("<div style='min-height: 10px;'></div>")
-                
-                # E. Distinct action button
-                # We combine key_prefix and idx to ensure every button across the app has a unique identifier
-                if st.button("🎬 Info", key=f"{key_prefix}_{idx}", use_container_width=True, type="secondary"):
-                    selected_movie = row
-
+        # Create a fresh row of 5 columns for this chunk
+        cols = st.columns(row_size)
+        
+        for idx, (_, row) in enumerate(chunk.iterrows()):
+            # Calculate a globally unique index for the button key
+            global_idx = row_idx + idx
+            
+            with cols[idx]:
+                with st.container(border=True):
+                    # Poster
+                    poster = row["poster_url"] if str(row["poster_url"]) != "nan" else "https://placeholder.com"
+                    st.image(poster, use_container_width=True)
+                    
+                    # Title
+                    st.markdown(f"**{row['title']}**")
+                    
+                    # Rating
+                    rating_raw = row.get("vote_average", "N/A")
+                    if pd.notna(rating_raw) and isinstance(rating_raw, (int, float)):
+                        rating = f"{float(rating_raw):.1f}"
+                    else:
+                        rating = "N/A"
+                    st.caption(f"⭐ {rating} / 10")
+                    
+                    st.html("<div style='min-height: 10px;'></div>")
+                    
+                    # Button
+                    if st.button("🎬 Info", key=f"{key_prefix}_{global_idx}", use_container_width=True, type="secondary"):
+                        selected_movie = row
+                        
     return selected_movie
 
 def render_similar_mix_tab(prefix):
@@ -144,25 +134,70 @@ def render_search_vibe_tab(prefix):
             show_movie(selected)
 
 
-def render_browse_categories_tab(prefix):
-    """Reusable Component for Tab 4: Genre Filtering"""
-    st.header("🎭 Browse Categories")
-    st.caption("Filter our collection down by your favorite genres.")
+def render_advanced_search_tab(prefix):
+    st.header("🎭 Advanced Studio Search")
+    st.caption("Mix and match criteria to scan our entire global database.")
+
+    # 1. Setup search filter input widgets layout
+    col_g, col_c, col_d = st.columns(3)
     
-    # Safely extract unique categories out of the dataframe string data
-    all_genres = sorted(list(set([g.strip() for sublist in movies['genres'].dropna().str.split(',') for g in sublist])))
-    selected_genre = st.selectbox("Pick a Category", all_genres, key=f"{prefix}_genre_select")
+    with col_g:
+        # Extract unique genres for dropdown selector
+        all_genres = ["All Genres"] + sorted(list(set([g.strip() for sublist in movies['genres'].dropna().str.split(',') for g in sublist])))
+        selected_genre = st.selectbox("Genre", all_genres, key=f"{prefix}_adv_genre")
+        
+    with col_c:
+        search_cast = st.text_input("Actor / Actress Name", placeholder="e.g., Tom Hanks", key=f"{prefix}_adv_cast").strip()
+        
+    with col_d:
+        search_director = st.text_input("Director Name", placeholder="e.g., Christopher Nolan", key=f"{prefix}_adv_director").strip()
+
+    # 2. Apply filtering logic iteratively
+    filtered_df = movies.copy()
+
+    # Filter by Genre if selected
+    if selected_genre != "All Genres":
+        filtered_df = filtered_df[filtered_df['genres'].str.contains(selected_genre, na=False, case=False)]
+
+    # Filter by Cast string match if typed
+    if search_cast:
+        filtered_df = filtered_df[filtered_df['cast'].str.contains(search_cast, na=False, case=False)]
+
+    # Filter by Director string match if typed
+    if search_director:
+        filtered_df = filtered_df[filtered_df['director'].str.contains(search_director, na=False, case=False)]
+
+    st.divider()
     
-    genre_filtered = movies[movies['genres'].str.contains(selected_genre, na=False, case=False)].head(5).reset_index(drop=True)
-    selected = render_movie_grid(genre_filtered, f"{prefix}_genre")
-    if selected is not None:
-        show_movie(selected)
+    # 3. Output results banner summary
+    total_results = len(filtered_df)
+    if total_results > 0:
+        st.markdown(f"📊 Found **{total_results}** matching movies matching your layout filters:")
+        
+        # Call the updated chunking layout grid to display everything!
+        selected = render_movie_grid(filtered_df.reset_index(drop=True), f"{prefix}_search_grid")
+        if selected is not None:
+            show_movie(selected)
+    else:
+        st.warning("🕵️ No matches found! Try broadening your search fields or adjusting spelling.")
 
 # =========================
 # SESSION STATE CONTROL
 # =========================
-if "mode" not in st.session_state:
+if "mode" not in st.session_state: # prevents data from being reset when the app re-runs from top to bottom on user interaction
     st.session_state.mode = "home"
+# ========================================================================================================================================================================================================    
+#                                                                                      UI PART 
+# ========================================================================================================================================================================================================  
+
+# =========================
+# 0. PAGE CONFIG
+# =========================
+st.set_page_config(page_title="MovieMatch", layout="wide")
+
+st.title("🎬 Hybrid Movie Recommender System")
+st.write("Welcome to MovieMatch! Log in with your User ID to unlock personalized recommendations or use Guest Mode.")
+st.divider()
 
 # =========================
 # 1. HOME MODE
@@ -288,7 +323,7 @@ elif st.session_state.mode == "user":
         render_search_vibe_tab(prefix="user")
 
     with tab4:
-        render_browse_categories_tab(prefix="user")
+        render_advanced_search_tab(prefix="user")
 
 # =========================
 # 4. GUEST MODE
@@ -328,4 +363,4 @@ elif st.session_state.mode == "guest":
         render_search_vibe_tab(prefix="guest")
 
     with tab4:
-        render_browse_categories_tab(prefix="guest")
+        render_advanced_search_tab(prefix="guest")
