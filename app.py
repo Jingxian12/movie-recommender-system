@@ -101,7 +101,6 @@ if st.session_state.mode == "home":
                 * 📂 **Saved History**: Keep track of your personal viewing history.
                 """
             )
-            # Changed icon to 🔑 (key) or omitted 🚨 since "🚨" means danger/alert
             if st.button("Log In to Your Profile", use_container_width=True, type="primary", icon="🔑"):
                 st.session_state.mode = "login"
                 st.rerun()
@@ -116,7 +115,7 @@ if st.session_state.mode == "home":
                 * 🍿 **Zero Setup**: No account or password needed—just jump straight in!
                 """
             )
-            if st.button("Continue as Guest", use_container_width=True, icon="👋"):
+            if st.button("Continue as Guest", use_container_width=True,type="primary", icon="👋"):
                 st.session_state.mode = "guest"
                 st.rerun()
 
