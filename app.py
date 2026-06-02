@@ -93,7 +93,7 @@ def render_movie_grid(movie_df, key_prefix):
                 st.markdown(f"**{row['title']}**")
                 
                 # C. Metadata subtext (Rating badge)
-                rating = row.get("vote_average", "N/A")
+                rating_raw = row.get("vote_average", "N/A")
                 # if pd.notna(rating_raw) and isinstance(rating_raw, (int, float)): # Check if the rating is a valid number before formatting it
                 #     rating = f"{float(rating):.1f}"
                 # else:
