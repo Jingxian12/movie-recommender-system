@@ -229,7 +229,7 @@ if st.session_state.mode == "home":
 elif st.session_state.mode == "login":
     col1, col2 = st.columns([1, 6])
     with col1:
-        if st.button("⬅️ Home"):
+        if st.button("🏡 Home Page"):
             st.session_state.mode = "home"
             st.rerun()
 
@@ -248,6 +248,10 @@ elif st.session_state.mode == "login":
 # =========================
 elif st.session_state.mode == "user":
     col1, col2 = st.columns([8, 1])
+    with col1:
+        if st.button("🏡 Home Page"):
+            st.session_state.mode = "home"
+            st.rerun()
     with col2:
         if st.button("🚪 Sign Out", key="user_logout"):
             logout()
