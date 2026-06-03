@@ -84,33 +84,6 @@ def recommend_cf(user_id, user_item_matrix, item_topk, movies):
     return recommendations
 
 
-def recommend_content(movie_title, content_topk, movies):
-    """Content-Based recommendation strategy using precomputed TF-IDF."""
-    # 1. Extract raw tmdbId
-    matching_movies = movies[movies["title"] == movie_title]
-    if matching_movies.empty:
-        return None
-        
-    raw_id = matching_movies["tmdbId"].values[0]
-    
-    # 2. Force conversion to integer to fix potential float mismatch keys
-    tmdb_id_int = int(float(raw_id))
-    
-    # Try looking up both int and string variants just in case guest mode used strings
-    if tmdb_id_int in content_topk:
-        rec_list = content_topk[tmdb_id_int]
-    elif str(tmdb_id_int) in content_topk:
-        rec_list = content_topk[str(tmdb_id_int)]
-    else:
-        return None
-
-    # 3. Get recommended movie IDs
-    rec_tmdb = [int(float(i[0])) for i in rec_list]
-    
-    # 4. Filter out recommended data safely
-    return movies[movies["tmdbId"].astype(float).astype(int).isin(rec_tmdb)].reset_index(drop=True)
-
-
 def recommend_semantic(query, embeddings, movies):
     """Semantic Search using SBERT embeddings."""
     # Note: Assuming q_vec is generated from the query text in production,
