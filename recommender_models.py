@@ -98,7 +98,7 @@ def recommend_content(movie_title, content_topk, movies):
         return None
         
     # content_topk[target_id] is an already sorted list: [(movie_id, score), (movie_id, score), ...]
-    top_matches = content_topk[target_id][:5] # Slice to retrieve the Top 5 matches
+    top_matches = content_topk[target_id][:10] # Slice to retrieve the Top 5 matches
     
     rec_tmdb = [item[0] for item in top_matches]
     scores = [round(item[1], 4) for item in top_matches]
