@@ -106,15 +106,30 @@ def render_similar_mix_tab(prefix):
     st.header("🎥 Similar Mix")
     st.caption("Select a movie you love to find others built with a similar recipe.")
     
+    # 1. Initialize session state variables for this tab if they don't exist
+    if f"{prefix}_rec_data" not in st.session_state:
+        st.session_state[f"{prefix}_rec_data"] = None
+
     movie = st.selectbox("Select Movie", movies["title"], key=f"{prefix}_cb_select")
+    
+    # 2. When the button is clicked, fetch the data and save it in Session State
     if st.button("Find Matches", key=f"{prefix}_cb_btn"):
-        rec_movies = recommend_content(movie, content_topk, movies)
-        if rec_movies is None or rec_movies.empty:
-            st.error("No matches found in our database.")
-        else:
-            selected = render_movie_grid(rec_movies, f"{prefix}_tfidf")
-            if selected is not None:
-                show_movie(selected)
+        with st.spinner("Finding similar movies..."):
+            rec_movies = recommend_content(movie, content_topk, movies)
+            if rec_movies is None or rec_movies.empty:
+                st.session_state[f"{prefix}_rec_data"] = None
+                st.error("No matches found in our database.")
+            else:
+                # Save the DataFrame to state so it survives clicks/reruns
+                st.session_state[f"{prefix}_rec_data"] = rec_movies
+
+    # 3. Render the grid from Session State (NOT from inside the button condition)
+    if st.session_state[f"{prefix}_rec_data"] is not None:
+        selected = render_movie_grid(st.session_state[f"{prefix}_rec_data"], f"{prefix}_tfidf")
+        
+        # 4. Show info pop-up modal safely
+        if selected is not None:
+            show_movie(selected)
 
 
 def render_search_vibe_tab(prefix):
