@@ -12,11 +12,6 @@ def load_data():
     """Loads and prepares the DataFrames."""
     movies = pd.read_csv("dataset/tmdb_clean.csv",encoding="utf-8-sig")
     ratings = pd.read_csv("dataset/ratings_clean.csv",encoding="utf-8-sig")
-    links = pd.read_csv("dataset/movieLens.csv",encoding="utf-8-sig")
-    
-    # Build Mapping
-    ratings = ratings.merge(links[["movieId", "tmdbId"]], on="movieId")
-    ratings = ratings.merge(movies, on="tmdbId")
     
     # User-Item Matrix
     user_item_matrix = ratings.pivot_table(
