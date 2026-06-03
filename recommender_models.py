@@ -57,6 +57,8 @@ def recommend_cf(user_id, user_item_matrix, item_topk, movies):
     for movie in watched:
         if movie in item_topk:
             for neighbor, sim in item_topk[movie]:
+                if neighbor in watched:
+                    continue
                 scores[neighbor] = scores.get(neighbor, 0) + sim
 
     ranked = sorted(scores.items(), key=lambda x: x[1], reverse=True)
