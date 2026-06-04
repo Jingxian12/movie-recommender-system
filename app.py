@@ -127,13 +127,13 @@ def render_similar_mix_tab(prefix):
 
     # 3. Render the grid from Session State (NOT from inside the button condition)
     if st.session_state[f"{prefix}_rec_data"] is not None:
+        st.write("Below are the top 10 movies calculated by our engine:")
+        st.markdown("markdown")
+        st.caption("caption")
         selected = render_movie_grid(st.session_state[f"{prefix}_rec_data"], f"{prefix}_tfidf")
         
         # 4. Show info pop-up modal safely
         if selected is not None:
-            st.write("Below are the top 10 movies calculated by our engine:")
-            st.markdown("markdown")
-            st.caption("caption")
             show_movie(selected)
 
 
