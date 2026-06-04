@@ -148,15 +148,25 @@ def render_search_vibe_tab(prefix):
         if selected is not None:
             show_movie(selected)
 
-def render_advanced_search_tab(prefix):
+def render_advanced_search_tab(prefix, movies):
+    """
+    Renders the advanced search tab with dynamic filters, sorting by date/title, 
+    and integrated pagination.
+    
+    Parameters:
+    - prefix (str): Unique string identifier for session state scoping.
+    - movies (pd.DataFrame): The main movies dataframe containing 'genres', 'cast', 'director', 'title', and 'release_date'.
+    """
     st.header("🔍 Global Studio Search")
     st.caption("Choose a category method below to find your next favorite movie.")
 
-    # 1. Initialize page tracking variables in session state if they don't exist
+    # 1. Initialize tracking variables in session state if they don't exist
     if f"{prefix}_current_page" not in st.session_state:
         st.session_state[f"{prefix}_current_page"] = 0
     if f"{prefix}_previous_search" not in st.session_state:
         st.session_state[f"{prefix}_previous_search"] = ""
+    if f"{prefix}_previous_sort" not in st.session_state:
+        st.session_state[f"{prefix}_previous_sort"] = ""
 
     # 2. Main navigation radio selection
     search_method = st.radio(
@@ -207,42 +217,67 @@ def render_advanced_search_tab(prefix):
 
     st.divider()
     
-    # 4. Pagination Core Math Engine
+    # 4. Sorting & Pagination Logic Engine
     if not search_triggered:
         st.info("💡 Select an option from the dropdown menu above to display matching movies instantly!")
     else:
         total_results = len(filtered_df)
         
         if total_results > 0:
-            items_per_page = 20
+            # Layout splitting into Results Info text and the Sorting Dropdown widget
+            col_info, col_sort = st.columns([2, 1])
             
-            # Calculate total pages needed (e.g., 45 movies / 20 = 3 pages total)
-            import math
+            with col_info:
+                st.markdown(f"### Total Results Found: **{total_results}**")
+                
+            with col_sort:
+                sort_option = st.selectbox(
+                    "Sort results by:",
+                    ["📅 Release Date (Newest)", "📅 Release Date (Oldest)", "🔤 Title (A - Z)", "🔤 Title (Z - A)"],
+                    key=f"{prefix}_sort_by"
+                )
+            
+            # Reset page back to 0 if the user changes the sorting strategy
+            if sort_option != st.session_state[f"{prefix}_previous_sort"]:
+                st.session_state[f"{prefix}_current_page"] = 0
+                st.session_state[f"{prefix}_previous_sort"] = sort_option
+
+            # Process sort parameters on the dataset string patterns (YYYY-MM-DD)
+            if sort_option == "📅 Release Date (Newest)":
+                filtered_df = filtered_df.sort_values(by="release_date", ascending=False, na_position='last')
+            elif sort_option == "📅 Release Date (Oldest)":
+                filtered_df = filtered_df.sort_values(by="release_date", ascending=True, na_position='last')
+            elif sort_option == "🔤 Title (A - Z)":
+                filtered_df = filtered_df.sort_values(by="title", ascending=True)
+            elif sort_option == "🔤 Title (Z - A)":
+                filtered_df = filtered_df.sort_values(by="title", ascending=False)
+            
+            # Pagination metrics calculations
+            items_per_page = 20
             total_pages = math.ceil(total_results / items_per_page)
             current_page = st.session_state[f"{prefix}_current_page"]
             
-            # Calculate the row boundaries for the current active slice page
+            # Calculate the row indices boundaries for active chunk slicing
             start_idx = current_page * items_per_page
             end_idx = min(start_idx + items_per_page, total_results)
             
-            # Slice our dataframe down to just the 20 target movies for this page
+            # Slice our dataframe down to just the 20 target rows for this page view
             page_df = filtered_df.iloc[start_idx:end_idx].reset_index(drop=True)
             
             st.markdown(f"📊 Showing results **{start_idx + 1} - {end_idx}** of **{total_results}**:")
             
-            # Display our 20 page entries using your flexible chunk grid function
+            # Display entries using your flexible grid visual components
             selected = render_movie_grid(page_df, f"{prefix}_page_{current_page}")
             if selected is not None:
                 show_movie(selected)
                 
-            st.write("") # Spacer before pagination control buttons
+            st.write("") # Spacer layout padding
             st.divider()
             
             # 5. Page Navigation Controller Buttons
             col_left, col_mid, col_right = st.columns([1, 2, 1])
             
             with col_left:
-                # Disable the Back button if we are on the first page
                 if st.button("⬅️ Previous Page", use_container_width=True, disabled=(current_page == 0), key=f"{prefix}_btn_prev"):
                     st.session_state[f"{prefix}_current_page"] -= 1
                     st.rerun()
@@ -251,7 +286,6 @@ def render_advanced_search_tab(prefix):
                 st.markdown(f"<p style='text-align: center; color: gray;'>Page {current_page + 1} of {total_pages}</p>", unsafe_allow_html=True)
                 
             with col_right:
-                # Disable the Next button if we are on the final page
                 if st.button("Next Page ➡️", use_container_width=True, disabled=(current_page >= total_pages - 1), key=f"{prefix}_btn_next"):
                     st.session_state[f"{prefix}_current_page"] += 1
                     st.rerun()
