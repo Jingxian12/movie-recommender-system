@@ -148,7 +148,7 @@ def render_search_vibe_tab(prefix):
         if selected is not None:
             show_movie(selected)
 
-def render_advanced_search_tab(prefix, movies):
+def render_advanced_search_tab(prefix):
     """
     Renders the advanced search tab with dynamic filters, sorting by date/title, 
     and integrated pagination.
