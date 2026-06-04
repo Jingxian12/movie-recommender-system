@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import pickle
 import gzip
+from sentence_transformers import SentenceTransformer, CrossEncoder
 from sklearn.metrics.pairwise import cosine_similarity
 
 # =========================
@@ -38,12 +39,29 @@ def load_models():
         embeddings = pickle.load(f)
         
     return item_topk, content_topk, embeddings
+    
+# 🌟 Cache the Bi-Encoder inside the model file
+@st.cache_resource
+def load_bi_encoder():
+    return SentenceTransformer('all-MiniLM-L6-v2')
+
+# 🌟 Cache the Cross-Encoder inside the model file
+@st.cache_resource
+def load_cross_encoder():
+    return CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
+
+# Initialize instances globally within this module's scope
+model = load_bi_encoder()
+cross_encoder = load_cross_encoder()
 
 
-# =========================
-# RECOMMENDATION ENGINES
-# =========================
+# ========================================================================================================================================================================================================
+#                                                                                RECOMMENDATION ENGINES
+# ========================================================================================================================================================================================================
 
+# ============================================================================================================= 
+# A) Item-Based (Collaborative Filtering)
+# ============================================================================================================= 
 def recommend_cf(user_id, user_item_matrix, item_topk, movies):
     """Collaborative Filtering recommendation strategy with correct ranking and rating weighting."""
     
@@ -82,7 +100,9 @@ def recommend_cf(user_id, user_item_matrix, item_topk, movies):
     recommendations = recommendations.set_index('tmdbId').loc[rec_tmdb].reset_index()
 
     return recommendations
-
+# =============================================================================================================   
+#  B) TF-IDF PART (Content-Based Filtering) 
+# ============================================================================================================= 
 def recommend_content(movie_title, content_topk, movies):
     """Generates content-based recommendations sorted strictly by similarity score."""
     
@@ -117,15 +137,47 @@ def recommend_content(movie_title, content_topk, movies):
     recommendations = recommendations.sort_values(by='score', ascending=False).reset_index(drop=True)
 
     return recommendations
-
-
-def recommend_semantic(query, embeddings, movies):
-    """Semantic Search using SBERT embeddings."""
-    # Note: Assuming q_vec is generated from the query text in production,
-    # keeping your snippet's original structure here using existing embeddings.
-    q_vec = np.array(embeddings)  
+# ============================================================================================================= 
+#   C) SBERT (NLP PART) 
+# ============================================================================================================= 
+def recommend_semantic(query, embeddings, movies, top_k=10):
+    """Hybrid Semantic Search that intercepts short keywords and falls back to AI ranking."""
+    clean_query = query.strip().lower()
+    if not clean_query:
+        return pd.DataFrame()
+        
+    # Handle NaN safety check for string comparisons
+    movies_clean = movies.copy()
+    for col in ['director', 'title', 'cast']:
+        if col in movies_clean.columns:
+            movies_clean[col] = movies_clean[col].fillna("")
+            
+    # STEP 1: KEYWORD INTERCEPTION (For short queries like "nolan")
+    keyword_matches = movies_clean[
+        (movies_clean['director'].str.lower().str.contains(clean_query)) |
+        (movies_clean['title'].str.lower().str.contains(clean_query)) |
+        (movies_clean['cast'].str.lower().str.contains(clean_query))
+    ]
     
-    scores = cosine_similarity(q_vec[:1], embeddings)[0]
-    top_k = np.argsort(scores)[::-1][:10]
+    if len(clean_query.split()) <= 2 and not keyword_matches.empty:
+        sort_col = 'popularity' if 'popularity' in keyword_matches.columns else keyword_matches.index.name
+        result = keyword_matches.sort_values(by=sort_col, ascending=False).head(top_k).copy()
+        result['rerank_score'] = 99.0  
+        return result
+
+    # STEP 2: DEEP SEMANTIC AI RE-RANKING (Using local cached models)
+    query_vec = model.encode([query])
+    scores = cosine_similarity(query_vec, embeddings)[0]
+    candidate_indices = np.argsort(scores)[::-1][:30]
     
-    return movies.iloc[top_k].reset_index(drop=True)
+    candidates = movies_clean.iloc[candidate_indices].copy()
+    
+    if 'tags' not in candidates.columns:
+        return candidates.head(top_k) 
+        
+    pairs = [[query, row['tags']] for _, row in candidates.iterrows()]
+    cross_scores = cross_encoder.predict(pairs)
+    candidates['rerank_score'] = cross_scores
+    
+    final_sorted = candidates.sort_values(by='rerank_score', ascending=False).head(top_k)
+    return final_sorted
