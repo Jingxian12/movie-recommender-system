@@ -131,6 +131,9 @@ def render_similar_mix_tab(prefix):
         
         # 4. Show info pop-up modal safely
         if selected is not None:
+            st.write("Below are the top 10 movies calculated by our engine:")
+            st.markdown("markdown")
+            st.caption("caption")
             show_movie(selected)
 
 
