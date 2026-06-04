@@ -142,14 +142,32 @@ def render_search_vibe_tab(prefix):
     st.header("🧠 Search by Vibe")
     st.caption("Describe your ideal movie vibe, mood, or plot elements in everyday words.")
     
+    # Track results via session_state to prevent posters from disappearing on click
+    if f"{prefix}_search_results" not in st.session_state:
+        st.session_state[f"{prefix}_search_results"] = None
+
     query = st.text_area(
         "What are you in the mood for?", 
         key=f"{prefix}_sb_query", 
         placeholder="e.g., A suspenseful spacesuit thriller with an unexpected twist ending."
     )
+    
     if st.button("Search Mood", key=f"{prefix}_sb_btn"):
-        results = recommend_semantic(query, embeddings, movies)
-        selected = render_movie_grid(results, f"{prefix}_sbert")
+        if query.strip() == "":
+            st.warning("Please write something before searching!")
+        else:
+            with st.spinner("Analyzing your mood..."):
+                # Call the imported function cleanly
+                results = recommend_semantic(query, embeddings, movies, top_k=10)
+                if results.empty:
+                    st.error("No movies matched your vibe. Try adjusting your description!")
+                    st.session_state[f"{prefix}_search_results"] = None
+                else:
+                    st.session_state[f"{prefix}_search_results"] = results
+
+    # Render layout safely outside the click branch logic
+    if st.session_state[f"{prefix}_search_results"] is not None:
+        selected = render_movie_grid(st.session_state[f"{prefix}_search_results"], f"{prefix}_sbert")
         if selected is not None:
             show_movie(selected)
 
@@ -309,18 +327,18 @@ if "mode" not in st.session_state: # prevents data from being reset when the app
 #                                                                                      UI PART 
 # ========================================================================================================================================================================================================  
 
-# =========================
-# 0. PAGE CONFIG
-# =========================
+# =============================================================================================================================
+#                                                     0. PAGE CONFIG
+# =============================================================================================================================
 st.set_page_config(page_title="MovieMatch", layout="wide")
 
 st.title("🎬 Hybrid Movie Recommender System")
 st.write("Welcome to MovieMatch! Log in with your User ID to unlock personalized recommendations or use Guest Mode.")
 st.divider()
 
-# =========================
-# 1. HOME MODE
-# =========================
+# =============================================================================================================================
+#                                                       1. HOME MODE
+# =============================================================================================================================
 if st.session_state.mode == "home":
     col1, col2 = st.columns(2, gap="large")
     with col1:
@@ -377,9 +395,9 @@ if st.session_state.mode == "home":
         print(f"Error on trending section: {e}")
         pass
 
-# =========================
-# 2. LOGIN MODE
-# =========================
+# =============================================================================================================================
+#                                                     2. LOGIN MODE
+# =============================================================================================================================
 elif st.session_state.mode == "login":
     col1, col2 = st.columns([1, 6])
     with col1:
@@ -404,9 +422,9 @@ elif st.session_state.mode == "login":
         else:
             st.error("❌ User not found. Please enter a valid ID!")
             
-# =========================
-# 3. USER MODE
-# =========================
+# =============================================================================================================================
+#                                                         3. USER MODE
+# =============================================================================================================================
 elif st.session_state.mode == "user":
     col1, col2 = st.columns([8, 1])
     with col1:
@@ -444,9 +462,9 @@ elif st.session_state.mode == "user":
     with tab4:
         render_advanced_search_tab(prefix="user")
 
-# =========================
+# =============================================================================================================================
 # 4. GUEST MODE
-# =========================
+# =============================================================================================================================
 elif st.session_state.mode == "guest":
     col1, col2 = st.columns([8, 1])
     with col1:
