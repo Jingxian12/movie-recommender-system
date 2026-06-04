@@ -129,7 +129,7 @@ def render_similar_mix_tab(prefix):
     if st.session_state[f"{prefix}_rec_data"] is not None:
         st.divider()
         st.header("Best Match for You:")
-        st.markdown("Below are the top 10 movies calculated by our engine:")
+        st.caption("Below are the top 10 movies calculated by our engine:")
         selected = render_movie_grid(st.session_state[f"{prefix}_rec_data"], f"{prefix}_tfidf")
         
         # 4. Show info pop-up modal safely
