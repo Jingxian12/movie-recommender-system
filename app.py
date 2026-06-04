@@ -247,10 +247,13 @@ def render_advanced_search_tab(prefix):
                 filtered_df = filtered_df.sort_values(by="release_date", ascending=False, na_position='last')
             elif sort_option == "📅 Release Date (Oldest)":
                 filtered_df = filtered_df.sort_values(by="release_date", ascending=True, na_position='last')
+                
+           # --- UPDATED CASE-INSENSITIVE TITLE SORTING ---
             elif sort_option == "🔤 Title (A - Z)":
-                filtered_df = filtered_df.sort_values(by="title", ascending=True)
+                # key=lambda col: col.str.lower() converts strings to lowercase ONLY during the sort process
+                filtered_df = filtered_df.sort_values(by="title", ascending=True, key=lambda col: col.str.lower())
             elif sort_option == "🔤 Title (Z - A)":
-                filtered_df = filtered_df.sort_values(by="title", ascending=False)
+                filtered_df = filtered_df.sort_values(by="title", ascending=False, key=lambda col: col.str.lower())
             
             # Pagination metrics calculations
             items_per_page = 20
