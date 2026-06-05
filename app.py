@@ -104,7 +104,7 @@ def render_advanced_search_tab(prefix):
         st.session_state[f"{prefix}_previous_sort"] = ""
 
     # 2. Main navigation radio selection
-    search_method = st.radio("How would you like to browse?",["🎭 Browse by Genre", "🎬 Find by Actor/Actress", "🎥 Find by Director"], horizontal=True, key=f"{prefix}_search_method_radio")
+    search_method = st.radio("How would you like to browse?",["🎥 Browse by Genre", "🎭 Find by Actor/Actress", "🎬 Find by Director"], horizontal=True, key=f"{prefix}_search_method_radio")
     st.write("") 
 
     filtered_df = pd.DataFrame()
