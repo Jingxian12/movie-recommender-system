@@ -4,18 +4,43 @@ import numpy as np
 import math
 from recommender_models import (load_data, load_models, recommend_cf, recommend_content, recommend_semantic)
 
-# Call the function to get data
+""" Call the function to get data """
 movies, user_item_matrix = load_data()
 item_topk, content_topk, embeddings = load_models()
 
-# =========================
-# MOVIE DETAILS UI DIALOG
-# =========================
+# ======================================================================================================================================================
+#                                                                 MOVIE DETAILS UI DIALOG
+# ======================================================================================================================================================
 @st.dialog("🎬 Movie Details", width="large")
 def show_movie(movie):
-    col1, col2 = st.columns([1, 2]) # col1 : image / col2 : information
+        col1, col2 = st.columns([1, 2])
     with col1:
-        st.image(movie["poster_url"], use_container_width=True)
+        poster = str(movie.get("poster_url", "")).strip()
+        if poster in ["", "nan", "None"] or pd.isna(movie["poster_url"]):
+            # Renders a sleek CSS container that perfectly mimics an image frame
+            st.markdown(
+                """
+                <div style="
+                    border: 2px dashed #ccc; 
+                    border-radius: 10px; 
+                    height: 380px; 
+                    display: flex; 
+                    flex-direction: column;
+                    align-items: center; 
+                    justify-content: center;
+                    background-color: #f9f9f9;
+                    color: #777;
+                    text-align: center;
+                    padding: 10px;
+                ">
+                    <span style="font-size: 40px; margin-bottom: 10px;">🎬</span>
+                    <b style="font-size: 14px;">No Poster<br>Available</b>
+                </div>
+                """, 
+                unsafe_allow_html=True
+            )
+        else:
+            st.image(poster, use_container_width=True)
     with col2:
         # Safe formatting helper function
         def get_clean_val(val, suffix=""):
