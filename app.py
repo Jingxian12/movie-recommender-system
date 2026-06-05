@@ -34,9 +34,9 @@ def show_movie(movie):
         st.write("**Runtime:**", get_clean_val(movie["runtime"], " mins"))
         st.write("**Release Date:**", get_clean_val(movie["release_date"]))
 
-# =========================
-# HELPER ACTIONS
-# =========================
+# ========================================================================================================================================================================================================    
+#                                                                                      UI PART 
+# ======================================================================================================================================================================================================== 
 def logout():
     st.session_state.mode = "home"
     if "user_id" in st.session_state:
@@ -92,6 +92,7 @@ def render_movie_grid(movie_df, key_prefix):
 # ========================================================================================================================================================================================================    
 #                                                                                      FUNCTION PART 
 # ========================================================================================================================================================================================================
+# Tab 2
 def render_similar_mix_tab(prefix):
     """Reusable Component for Tab 2: Content-Based Matching"""
     st.header("🎥 Similar Mix")
@@ -101,12 +102,12 @@ def render_similar_mix_tab(prefix):
     if f"{prefix}_rec_data" not in st.session_state:
         st.session_state[f"{prefix}_rec_data"] = None
 
-    movie = st.selectbox("Select Movie", movies["title"], key=f"{prefix}_cb_select")
+    movie_selected = st.selectbox("Select Movie", movies["title"], key=f"{prefix}_cb_select")
     
     # 2. When the button is clicked, fetch the data and save it in Session State
     if st.button("Find Matches", key=f"{prefix}_cb_btn"):
         with st.spinner("Finding similar movies..."):
-            rec_movies = recommend_content(movie, content_topk, movies)
+            rec_movies = recommend_content(movie_selected, content_topk, movies)
             if rec_movies is None or rec_movies.empty:
                 st.session_state[f"{prefix}_rec_data"] = None
                 st.error("No matches found in our database.")
@@ -125,7 +126,7 @@ def render_similar_mix_tab(prefix):
         if selected is not None:
             show_movie(selected)
 
-
+# Tab 3
 def render_search_vibe_tab(prefix):
     """Reusable Component for Tab 3: NLP Semantic Search"""
     st.header("🧠 Search by Vibe")
@@ -160,6 +161,7 @@ def render_search_vibe_tab(prefix):
         if selected is not None:
             show_movie(selected)
 
+# Tab 4
 def render_advanced_search_tab(prefix):
     """
     Renders the advanced search tab with dynamic filters, sorting by date/title, 
