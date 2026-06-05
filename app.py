@@ -13,7 +13,7 @@ item_topk, content_topk, embeddings = load_models()
 # ======================================================================================================================================================
 @st.dialog("🎬 Movie Details", width="large")
 def show_movie(movie):
-        col1, col2 = st.columns([1, 2])
+    col1, col2 = st.columns([1, 2])
     with col1:
         poster = str(movie.get("poster_url", "")).strip()
         if poster in ["", "nan", "None"] or pd.isna(movie["poster_url"]):
