@@ -4,7 +4,7 @@ import numpy as np
 import math
 from recommender_models import (load_data, load_models, recommend_cf, recommend_content, recommend_semantic)
 
-""" Call the function to get data """
+# Call the function to get data
 movies, user_item_matrix = load_data()
 item_topk, content_topk, embeddings = load_models()
 
