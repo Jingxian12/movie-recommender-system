@@ -149,7 +149,7 @@ def recommend_semantic(query, embeddings, movies, top_k=10):
         
     # Handle NaN safety check for string comparisons
     movies_clean = movies.copy()
-    for col in ['director', 'title', 'cast']:
+    for col in ['director', 'title', 'cast','production_companies']:
         if col in movies_clean.columns:
             movies_clean[col] = movies_clean[col].fillna("")
             
@@ -157,7 +157,8 @@ def recommend_semantic(query, embeddings, movies, top_k=10):
     keyword_matches = movies_clean[
         (movies_clean['director'].str.lower().str.contains(clean_query)) |
         (movies_clean['title'].str.lower().str.contains(clean_query)) |
-        (movies_clean['cast'].str.lower().str.contains(clean_query))
+        (movies_clean['cast'].str.lower().str.contains(clean_query)) |
+        (movies_clean['production_companies'].str.lower().str.contains(clean_query))    
     ]
     
     if len(clean_query.split()) <= 2 and not keyword_matches.empty:
