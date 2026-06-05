@@ -90,31 +90,27 @@ def recommend_cf(user_id, user_item_matrix, item_topk, movies):
     recommendations = recommendations.set_index('tmdbId').loc[rec_tmdb].reset_index()
 
     return recommendations
+    
 # =============================================================================================================   
 #  B) TF-IDF PART (Content-Based Filtering) 
 # ============================================================================================================= 
+"""Generates content-based recommendations sorted strictly by similarity score."""
 def recommend_content(movie_title, content_topk, movies):
-    """Generates content-based recommendations sorted strictly by similarity score."""
-    
-    # 1. Locate the tmdbId of the currently selected movie title
-    movie_row = movies[movies['title'] == movie_title]
+    # 1. Finding the Target Movie's ID
+    movie_row = movies[movies['title'] == movie_title] # complete row
     if movie_row.empty:
         return None
-        
-    target_id = movie_row.iloc[0]['tmdbId']
+    target_id = movie_row.iloc[0]['tmdbId'] #[0] : to prevent movies have same title, so we take first one
 
     # 2. Extract similar neighbors from the precomputed topk dictionary
     if target_id not in content_topk:
         return None
-        
-    # content_topk[target_id] is an already sorted list: [(movie_id, score), (movie_id, score), ...]
-    top_matches = content_topk[target_id][:10] # Slice to retrieve the Top 5 matches
-    
+    top_matches = content_topk[target_id][:10] # Slice to retrieve the Top 10 matches
     rec_tmdb = [item[0] for item in top_matches]
     scores = [round(item[1], 4) for item in top_matches]
 
     # 3. Core Protection: Prevent the pandas .isin() filter from breaking the ranked order
-    # Extract the matching subset of movies from the global dataframe
+    # Extract the matching subset of movies from the global dataframe (order break here because pandas scan from top to bottom, return based on original database order)
     recommendations = movies[movies["tmdbId"].isin(rec_tmdb)].copy()
     
     # Create a temporary score mapping dictionary {tmdbId: score}
@@ -127,6 +123,7 @@ def recommend_content(movie_title, content_topk, movies):
     recommendations = recommendations.sort_values(by='score', ascending=False).reset_index(drop=True)
 
     return recommendations
+    
 # ============================================================================================================= 
 #   C) SBERT (NLP PART) 
 # ============================================================================================================= 
