@@ -4,20 +4,9 @@ import numpy as np
 import math
 from recommender_models import (load_data, load_models, recommend_cf, recommend_content, recommend_semantic)
 
-# =========================
-# INITIALIZE DATA & MODELS
-# =========================
-# Cache data/models so they don't reload on every button click/refresh
-@st.cache_data
-def get_cached_data():
-    return load_data()
-
-@st.cache_resource
-def get_cached_models():
-    return load_models()
-
-movies, user_item_matrix = get_cached_data()
-item_topk, content_topk, embeddings = get_cached_models()
+# Call the function to get data
+movies, user_item_matrix = load_data()
+item_topk, content_topk, embeddings = load_models()
 
 # =========================
 # MOVIE DETAILS UI DIALOG
