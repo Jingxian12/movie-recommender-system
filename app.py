@@ -15,32 +15,17 @@ item_topk, content_topk, embeddings = load_models()
 def show_movie(movie):
     col1, col2 = st.columns([1, 2])
     with col1:
+        # 1. Extract and clean the poster url
         poster = str(movie.get("poster_url", "")).strip()
+        
+        # 2. If it is empty or NaN, use a clean placeholder image
         if poster in ["", "nan", "None"] or pd.isna(movie["poster_url"]):
-            # Renders a sleek CSS container that perfectly mimics an image frame
-            st.markdown(
-                """
-                <div style="
-                    border: 2px dashed #ccc; 
-                    border-radius: 10px; 
-                    height: 380px; 
-                    display: flex; 
-                    flex-direction: column;
-                    align-items: center; 
-                    justify-content: center;
-                    background-color: #f9f9f9;
-                    color: #777;
-                    text-align: center;
-                    padding: 10px;
-                ">
-                    <span style="font-size: 40px; margin-bottom: 10px;">🎬</span>
-                    <b style="font-size: 14px;">No Poster<br>Available</b>
-                </div>
-                """, 
-                unsafe_allow_html=True
-            )
+            # Generates a clean 300x450 grey box that says "No Poster Available"
+            fallback_url = "https://placehold.co"
+            st.image(fallback_url, use_container_width=True)
         else:
             st.image(poster, use_container_width=True)
+
     with col2:
         # Safe formatting helper function
         def get_clean_val(val, suffix=""):
