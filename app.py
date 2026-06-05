@@ -144,7 +144,7 @@ def render_search_vibe_tab(prefix):
     
     if st.button("Search Mood", key=f"{prefix}_sb_btn"):
         if query.strip() == "":
-            st.warning("Please write something before searching!")
+            st.error("Please write something before searching!")
         else:
             with st.spinner("Analyzing your mood..."):
                 # Call the imported function cleanly
