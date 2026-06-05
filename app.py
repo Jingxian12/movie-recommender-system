@@ -77,9 +77,16 @@ def render_movie_grid(movie_df, key_prefix):
             
             with cols[idx]:
                 with st.container(border=True):
-                    # Poster
-                    poster = row["poster_url"] if str(row["poster_url"]) != "nan" else "https://placeholder.com"
+                    # --- FIXED POSTER FALLBACK LOGIC ---
+                    poster = str(row.get("poster_url", "")).strip()
+                    
+                    # Check for empty string, NaN, or None equivalents
+                    if poster in ["", "nan", "None"] or pd.isna(row["poster_url"]):
+                        # 200x300 works perfectly for standard vertical movie cards
+                        poster = "https://placehold.co"
+                    
                     st.image(poster, use_container_width=True)
+                    # ------------------------------------
                     
                     # Title
                     st.markdown(f"**{row['title']}**")
@@ -98,7 +105,7 @@ def render_movie_grid(movie_df, key_prefix):
                     if st.button("🎬 Info", key=f"{key_prefix}_{global_idx}", use_container_width=True, type="secondary"):
                         selected_movie = row
                         
-    return selected_movie
+    return selected_movie # Ensure you return this to catch it in your main script
 # ========================================================================================================================================================================================================    
 #                                                                                      FUNCTION PART 
 # ========================================================================================================================================================================================================
