@@ -6,10 +6,9 @@ import gzip
 from sentence_transformers import SentenceTransformer, CrossEncoder
 from sklearn.metrics.pairwise import cosine_similarity
 
-# =========================
-# DATA & MODEL LOADERS
-# =========================
-
+# ========================================================================================================================================================================================================
+#                                                                                 DATA & MODEL LOADERS
+# ========================================================================================================================================================================================================
 def load_data():
     """Loads and prepares the DataFrames."""
     movies = pd.read_csv("dataset/tmdb_clean.csv",encoding="utf-8-sig")
@@ -41,21 +40,6 @@ def load_models():
         
     return item_topk, content_topk, embeddings
     
-# 🌟 Cache the Bi-Encoder inside the model file
-@st.cache_resource
-def load_bi_encoder():
-    return SentenceTransformer('all-MiniLM-L6-v2')
-
-# 🌟 Cache the Cross-Encoder inside the model file
-@st.cache_resource
-def load_cross_encoder():
-    return CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
-
-# Initialize instances globally within this module's scope
-model = load_bi_encoder()
-cross_encoder = load_cross_encoder()
-
-
 # ========================================================================================================================================================================================================
 #                                                                                RECOMMENDATION ENGINES
 # ========================================================================================================================================================================================================
@@ -141,6 +125,20 @@ def recommend_content(movie_title, content_topk, movies):
 # ============================================================================================================= 
 #   C) SBERT (NLP PART) 
 # ============================================================================================================= 
+# 🌟 Cache the Bi-Encoder inside the model file
+@st.cache_resource
+def load_bi_encoder():
+    return SentenceTransformer('all-MiniLM-L6-v2')
+
+# 🌟 Cache the Cross-Encoder inside the model file
+@st.cache_resource
+def load_cross_encoder():
+    return CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
+
+# Initialize instances globally within this module's scope
+model = load_bi_encoder()
+cross_encoder = load_cross_encoder()
+
 def recommend_semantic(query, embeddings, movies, top_k=10):
     """Hybrid Semantic Search that intercepts short keywords and falls back to AI ranking."""
     clean_query = query.strip().lower()
