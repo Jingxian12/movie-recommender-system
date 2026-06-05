@@ -8,107 +8,18 @@ from recommender_models import (load_data, load_models, recommend_cf, recommend_
 movies, user_item_matrix = load_data()
 item_topk, content_topk, embeddings = load_models()
 
-# ======================================================================================================================================================
-#                                                                 MOVIE DETAILS UI DIALOG
-# ======================================================================================================================================================
-@st.dialog("🎬 Movie Details", width="large")
-def show_movie(movie):
-    col1, col2 = st.columns([1, 2])
-    with col1:
-        # 1. Extract and clean the poster url
-        poster = str(movie.get("poster_url", "")).strip()
-        
-        # 2. If it is empty or NaN, use a clean placeholder image
-        if poster in ["", "nan", "None"] or pd.isna(movie["poster_url"]):
-            # Generates a clean 300x450 grey box that says "No Poster Available"
-            fallback_url = "https://placehold.co"
-            st.image(fallback_url, use_container_width=True)
-        else:
-            st.image(poster, use_container_width=True)
-
-    with col2:
-        # Safe formatting helper function
-        def get_clean_val(val, suffix=""):
-            # Checks if value is NaN, None, or an empty string
-            if pd.isna(val) or str(val).strip().lower() in ["nan", "none", ""]:
-                return "Not Available"
-            return f"{val}{suffix}"
-            
-        st.write("**Title:**", get_clean_val(movie["title"]))
-        st.write("**Genres:**", get_clean_val(movie["genres"]))
-        st.write("**Overview:**", get_clean_val(movie["overview"]))
-        st.write("**Cast:**", get_clean_val(movie["cast"]))
-        st.write("**Director:**", get_clean_val(movie["director"]))
-        st.write("**Production Companies:**", get_clean_val(movie["production_companies"]))
-        # Automatically adds " mins" if the runtime exists, otherwise says "Not Available"
-        st.write("**Runtime:**", get_clean_val(movie["runtime"], " mins"))
-        st.write("**Release Date:**", get_clean_val(movie["release_date"]))
 
 # ========================================================================================================================================================================================================    
-#                                                                                      UI PART 
+#                                                                                FUNCTION / FORMAT PART
 # ======================================================================================================================================================================================================== 
 def logout():
     st.session_state.mode = "home"
     if "user_id" in st.session_state:
         del st.session_state.user_id
 
-def render_movie_grid(movie_df, key_prefix):
-    """
-    Renders a dynamic grid of movie cards wrapped into rows of 5 columns.
-    """
-    if movie_df.empty:
-        st.info("🔍 No movies found matching your criteria.")
-        return None
-        
-    selected_movie = None
-    num_movies = len(movie_df)
-    
-    # Chunk the dataframe into rows of 5 items each
-    row_size = 5
-    for row_idx in range(0, num_movies, row_size):
-        chunk = movie_df.iloc[row_idx : row_idx + row_size]
-        
-        # Create a fresh row of 5 columns for this chunk
-        cols = st.columns(row_size)
-        
-        for idx, (_, row) in enumerate(chunk.iterrows()):
-            # Calculate a globally unique index for the button key
-            global_idx = row_idx + idx
-            
-            with cols[idx]:
-                with st.container(border=True):
-                    # --- FIXED POSTER FALLBACK LOGIC ---
-                    poster = str(row.get("poster_url", "")).strip()
-                    
-                    # Check for empty string, NaN, or None equivalents
-                    if poster in ["", "nan", "None"] or pd.isna(row["poster_url"]):
-                        # 200x300 works perfectly for standard vertical movie cards
-                        poster = "https://placehold.co"
-                    
-                    st.image(poster, use_container_width=True)
-                    # ------------------------------------
-                    
-                    # Title
-                    st.markdown(f"**{row['title']}**")
-                    
-                    # Rating
-                    rating_raw = row.get("vote_average", "N/A")
-                    if pd.notna(rating_raw) and isinstance(rating_raw, (int, float)):
-                        rating = f"{float(rating_raw):.1f}"
-                    else:
-                        rating = "N/A"
-                    st.caption(f"⭐ {rating} / 10")
-                    
-                    st.html("<div style='min-height: 10px;'></div>")
-                    
-                    # Button
-                    if st.button("🎬 Info", key=f"{key_prefix}_{global_idx}", use_container_width=True, type="secondary"):
-                        selected_movie = row
-                        
-    return selected_movie # Ensure you return this to catch it in your main script
-# ========================================================================================================================================================================================================    
-#                                                                                      FUNCTION PART 
-# ========================================================================================================================================================================================================
+# ============================================================================================
+#                                    TAB DETAILS 
+# ============================================================================================
 # Tab 2
 def render_similar_mix_tab(prefix):
     """Reusable Component for Tab 2: Content-Based Matching"""
@@ -180,18 +91,11 @@ def render_search_vibe_tab(prefix):
 
 # Tab 4
 def render_advanced_search_tab(prefix):
-    """
-    Renders the advanced search tab with dynamic filters, sorting by date/title, 
-    and integrated pagination.
-    
-    Parameters:
-    - prefix (str): Unique string identifier for session state scoping.
-    - movies (pd.DataFrame): The main movies dataframe containing 'genres', 'cast', 'director', 'title', and 'release_date'.
-    """
+    """Renders the advanced search tab with dynamic filters, sorting by date/title, and integrated pagination. """
     st.header("🔍 Global Studio Search")
     st.caption("Choose a category method below to find your next favorite movie.")
 
-    # 1. Initialize tracking variables in session state if they don't exist
+    # 1. Initialize tracking variables in session state if they don't exist 
     if f"{prefix}_current_page" not in st.session_state:
         st.session_state[f"{prefix}_current_page"] = 0
     if f"{prefix}_previous_search" not in st.session_state:
@@ -200,13 +104,7 @@ def render_advanced_search_tab(prefix):
         st.session_state[f"{prefix}_previous_sort"] = ""
 
     # 2. Main navigation radio selection
-    search_method = st.radio(
-        "How would you like to browse?",
-        ["🎭 Browse by Genre", "🎬 Find by Actor/Actress", "🎥 Find by Director"],
-        horizontal=True,
-        key=f"{prefix}_search_method_radio"
-    )
-    
+    search_method = st.radio("How would you like to browse?",["🎭 Browse by Genre", "🎬 Find by Actor/Actress", "🎥 Find by Director"], horizontal=True, key=f"{prefix}_search_method_radio"
     st.write("") 
 
     filtered_df = pd.DataFrame()
@@ -214,28 +112,40 @@ def render_advanced_search_tab(prefix):
     current_search_key = ""
 
     # 3. Render dropdown menus dynamically based on selection
-    if search_method == "🎭 Browse by Genre":
+    # =========================
+    #           Genre
+    # =========================
+    if search_method == "🎥 Browse by Genre":
         all_genres = ["Select a Genre..."] + sorted(list(set([g.strip() for sublist in movies['genres'].dropna().str.split(',') for g in sublist])))
         selected_genre = st.selectbox("Pick a Category", all_genres, key=f"{prefix}_adv_genre")
-        
+
+        # User have select a genre, so system can start search 
         if selected_genre != "Select a Genre...":
             filtered_df = movies[movies['genres'].str.contains(selected_genre, na=False, case=False)]
             search_triggered = True
             current_search_key = f"genre_{selected_genre}"
 
-    elif search_method == "🎬 Find by Actor/Actress":
+    # =========================
+    #           People
+    # =========================
+    elif search_method == "🎭 Find by Actor/Actress":
         all_actors = ["Select an Actor/Actress..."] + sorted(list(set([actor.strip() for sublist in movies['cast'].dropna().str.split(',') for actor in sublist])))
         selected_actor = st.selectbox("Pick an Actor/Actress", all_actors, key=f"{prefix}_adv_cast")
-        
+
+         # User have select a person, so system can start search 
         if selected_actor != "Select an Actor/Actress...":
             filtered_df = movies[movies['cast'].str.contains(selected_actor, na=False, case=False)]
             search_triggered = True
             current_search_key = f"actor_{selected_actor}"
 
-    elif search_method == "🎥 Find by Director":
+    # =========================
+    #          Director
+    # =========================
+    elif search_method == "🎬 Find by Director":
         all_directors = ["Select a Director..."] + sorted(list(set([dir_name.strip() for sublist in movies['director'].dropna().str.split(',') for dir_name in sublist])))
         selected_director = st.selectbox("Pick a Director", all_directors, key=f"{prefix}_adv_director")
-        
+
+        # User have select a director, so system can start search 
         if selected_director != "Select a Director...":
             filtered_df = movies[movies['director'].str.contains(selected_director, na=False, case=False)]
             search_triggered = True
@@ -293,7 +203,7 @@ def render_advanced_search_tab(prefix):
             
             # Calculate the row indices boundaries for active chunk slicing
             start_idx = current_page * items_per_page
-            end_idx = min(start_idx + items_per_page, total_results)
+            end_idx = min(start_idx + items_per_page, total_results) # might less than 20 movies.
             
             # Slice our dataframe down to just the 20 target rows for this page view
             page_df = filtered_df.iloc[start_idx:end_idx].reset_index(drop=True)
@@ -312,7 +222,7 @@ def render_advanced_search_tab(prefix):
             col_left, col_mid, col_right = st.columns([1, 2, 1])
             
             with col_left:
-                if st.button("⬅️ Previous Page", use_container_width=True, disabled=(current_page == 0), key=f"{prefix}_btn_prev"):
+                if st.button("⬅️ Previous Page", use_container_width=True,type="primary", disabled=(current_page == 0), key=f"{prefix}_btn_prev"):
                     st.session_state[f"{prefix}_current_page"] -= 1
                     st.rerun()
                     
@@ -320,33 +230,126 @@ def render_advanced_search_tab(prefix):
                 st.markdown(f"<p style='text-align: center; color: gray;'>Page {current_page + 1} of {total_pages}</p>", unsafe_allow_html=True)
                 
             with col_right:
-                if st.button("Next Page ➡️", use_container_width=True, disabled=(current_page >= total_pages - 1), key=f"{prefix}_btn_next"):
+                if st.button("Next Page ➡️", use_container_width=True,type="primary", disabled=(current_page >= total_pages - 1), key=f"{prefix}_btn_next"):
                     st.session_state[f"{prefix}_current_page"] += 1
                     st.rerun()
         else:
-            st.warning("🕵️ No matches found for this selection.")
+            st.error("🕵️ No matches found for this selection.")
+
+# ============================================================================================
+#                                    MOVIE DETAILS     
+# ============================================================================================
+# 5 Movie cards show in one row
+def render_movie_grid(movie_df, key_prefix):
+    """Renders a dynamic grid of movie cards wrapped into rows of 5 columns."""
+    if movie_df.empty:
+        st.info("🔍 No movies found matching your criteria.")
+        return None
+        
+    selected_movie = None
+    num_movies = len(movie_df)
+    
+    # Chunk the dataframe into rows of 5 items each
+    row_size = 5
+    for row_idx in range(0, num_movies, row_size):
+        chunk = movie_df.iloc[row_idx : row_idx + row_size]
+        
+        # Create a fresh row of 5 columns for this chunk
+        cols = st.columns(row_size)
+        
+        for idx, (_, row) in enumerate(chunk.iterrows()):
+            # Calculate a globally unique index for the button key
+            global_idx = row_idx + idx
+            
+            with cols[idx]:
+                with st.container(border=True):
+                    # --- FIXED POSTER FALLBACK LOGIC ---
+                    poster = str(row.get("poster_url", "")).strip()
+                    
+                    # Check for empty string, NaN, or None equivalents
+                    if poster in ["", "nan", "None"] or pd.isna(row["poster_url"]):
+                        # 200x300 works perfectly for standard vertical movie cards
+                        poster = "https://placehold.co"
+                    
+                    st.image(poster, use_container_width=True)
+                    
+                    # Title
+                    st.markdown(f"**{row['title']}**")
+                    
+                    # Rating
+                    rating_raw = row.get("vote_average", "N/A")
+                    if pd.notna(rating_raw) and isinstance(rating_raw, (int, float)):
+                        rating = f"{float(rating_raw):.1f}"
+                    else:
+                        rating = "N/A"
+                    st.caption(f"⭐ {rating} / 10")
+                    
+                    st.html("<div style='min-height: 10px;'></div>")
+                    
+                    # Button
+                    if st.button("🎬 Info", key=f"{key_prefix}_{global_idx}", use_container_width=True, type="secondary"):
+                        selected_movie = row
+                        
+    return selected_movie 
+
+# Movie Information 
+@st.dialog("🎬 Movie Details", width="large")
+def show_movie(movie):
+    col1, col2 = st.columns([1, 2])
+    with col1:
+        # 1. Extract and clean the poster url
+        poster = str(movie.get("poster_url", "")).strip()
+        
+        # 2. If it is empty or NaN, use a clean placeholder image
+        if poster in ["", "nan", "None"] or pd.isna(movie["poster_url"]):
+            # Generates a clean 300x450 grey box that says "No Poster Available"
+            fallback_url = "https://placehold.co"
+            st.image(fallback_url, use_container_width=True)
+        else:
+            st.image(poster, use_container_width=True)
+
+    with col2:
+        # Safe formatting helper function
+        def get_clean_val(val, suffix=""):
+            # Checks if value is NaN, None, or an empty string
+            if pd.isna(val) or str(val).strip().lower() in ["nan", "none", ""]:
+                return "Not Available"
+            return f"{val}{suffix}"
+            
+        st.write("**Title:**", get_clean_val(movie["title"]))
+        st.write("**Genres:**", get_clean_val(movie["genres"]))
+        st.write("**Overview:**", get_clean_val(movie["overview"]))
+        st.write("**Cast:**", get_clean_val(movie["cast"]))
+        st.write("**Director:**", get_clean_val(movie["director"]))
+        st.write("**Production Companies:**", get_clean_val(movie["production_companies"]))
+        # Automatically adds " mins" if the runtime exists, otherwise says "Not Available"
+        st.write("**Runtime:**", get_clean_val(movie["runtime"], " mins"))
+        st.write("**Release Date:**", get_clean_val(movie["release_date"]))
+        
+
+# ========================================================================================================================================================================================================    
+#                                                                                      UI PART 
+# ========================================================================================================================================================================================================  
 
 # =========================
 # SESSION STATE CONTROL
 # =========================
 if "mode" not in st.session_state: # prevents data from being reset when the app re-runs from top to bottom on user interaction
     st.session_state.mode = "home"
-# ========================================================================================================================================================================================================    
-#                                                                                      UI PART 
-# ========================================================================================================================================================================================================  
 
-# =============================================================================================================================
-#                                                     0. PAGE CONFIG
-# =============================================================================================================================
+
+# ============================================================================================
+#                                     0. PAGE CONFIG
+# ============================================================================================
 st.set_page_config(page_title="MovieMatch", layout="wide")
 
 st.title("🎬 Hybrid Movie Recommender System")
 st.write("Welcome to MovieMatch! Log in with your User ID to unlock personalized recommendations or use Guest Mode.")
 st.divider()
 
-# =============================================================================================================================
-#                                                       1. HOME MODE
-# =============================================================================================================================
+# ============================================================================================
+#                                       1. HOME MODE
+# ============================================================================================
 if st.session_state.mode == "home":
     col1, col2 = st.columns(2, gap="large")
     with col1:
@@ -403,9 +406,9 @@ if st.session_state.mode == "home":
         print(f"Error on trending section: {e}")
         pass
 
-# =============================================================================================================================
-#                                                     2. LOGIN MODE
-# =============================================================================================================================
+# ============================================================================================
+#                                    2. LOGIN MODE
+# ============================================================================================
 elif st.session_state.mode == "login":
     col1, col2 = st.columns([1, 6])
     with col1:
@@ -430,9 +433,9 @@ elif st.session_state.mode == "login":
         else:
             st.error("❌ User not found. Please enter a valid ID!")
             
-# =============================================================================================================================
-#                                                         3. USER MODE
-# =============================================================================================================================
+# ============================================================================================
+#                                        3. USER MODE
+# ============================================================================================
 elif st.session_state.mode == "user":
     col1, col2 = st.columns([8, 1])
     with col1:
@@ -470,9 +473,9 @@ elif st.session_state.mode == "user":
     with tab4:
         render_advanced_search_tab(prefix="user")
 
-# =============================================================================================================================
-# 4. GUEST MODE
-# =============================================================================================================================
+# ============================================================================================
+#                                     4. GUEST MODE
+# ============================================================================================
 elif st.session_state.mode == "guest":
     col1, col2 = st.columns([8, 1])
     with col1:
