@@ -23,7 +23,7 @@ def logout():
 # Tab 2
 def render_similar_mix_tab(prefix):
     """Reusable Component for Tab 2: Content-Based Matching"""
-    st.header("🎥 Similar Mix")
+    st.header("🍿 Find Movies Similar to Your Favorites")
     st.caption("Select a movie you love to find others built with a similar recipe.")
     
     # 1. Initialize session state variables for this tab if they don't exist
@@ -57,7 +57,7 @@ def render_similar_mix_tab(prefix):
 # Tab 3
 def render_search_vibe_tab(prefix):
     """Reusable Component for Tab 3: NLP Semantic Search"""
-    st.header("🧠 Search by Vibe")
+    st.header("💬 Search by Movie Vibe or Plot")
     st.caption("Describe your ideal movie vibe, mood, or plot elements in everyday words.")
     
     # Track results via session_state to prevent posters from disappearing on click
@@ -452,8 +452,8 @@ elif st.session_state.mode == "user":
     tab1, tab2, tab3, tab4 = st.tabs([
         "🏠 Made For You", 
         "🎥 Similar Mix", 
-        "🧠 Search by Vibe", 
-        "🎭 Browse Categories"
+        "💬 Search by Story", 
+        "🔍 Criteria Search"
     ])
 
     with tab1:
@@ -489,8 +489,8 @@ elif st.session_state.mode == "guest":
     tab1, tab2, tab3, tab4 = st.tabs([
         "🔥 What's Hot", 
         "🎥 Similar Mix", 
-        "🧠 Search by Vibe", 
-        "🎭 Browse Categories"
+        "💬 Search by Story", 
+        "🔍 Criteria Search"
     ])
 
     with tab1:
