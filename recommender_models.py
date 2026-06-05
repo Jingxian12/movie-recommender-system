@@ -9,6 +9,10 @@ from sklearn.metrics.pairwise import cosine_similarity
 # ========================================================================================================================================================================================================
 #                                                                                 DATA & MODEL LOADERS
 # ========================================================================================================================================================================================================
+# Cache data/models so they don't reload heavy pandas filtering on every button click/refresh.
+# How : Save a duplicate copy inside the local cache storage so that streamlit will not re-reading files.
+
+@st.cache_data
 def load_data():
     """Loads and prepares the DataFrames."""
     movies = pd.read_csv("dataset/tmdb_clean.csv",encoding="utf-8-sig")
@@ -23,7 +27,8 @@ def load_data():
     
     return movies, user_item_matrix
 
-
+# Load AI model
+@st.cache_resource
 def load_models():
     """Loads the precomputed recommendation files."""
     # Item Similarity (CF)
