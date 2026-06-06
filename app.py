@@ -29,7 +29,7 @@ def render_similar_mix_tab(prefix):
     movie_selected = st.selectbox("Select Movie", movies["title"], key=f"{prefix}_cb_select")
     
     # 2. When the button is clicked, fetch the data and save it in Session State
-    if st.button("Find Matches", key=f"{prefix}_cb_btn"):
+    if st.button("Find Matches", key=f"{prefix}_cb_btn", type="primary"):
         with st.spinner("Finding similar movies..."):
             rec_movies = recommend_content(movie_selected, content_topk, movies)
             if rec_movies is None or rec_movies.empty:
@@ -66,7 +66,7 @@ def render_search_vibe_tab(prefix):
         placeholder="e.g., A suspenseful spacesuit thriller with an unexpected twist ending."
     )
     
-    if st.button("Search Mood", key=f"{prefix}_sb_btn"):
+    if st.button("Search", key=f"{prefix}_sb_btn", type="primary" ):
         if query.strip() == "":
             st.error("Please write something before searching!")
         else:
