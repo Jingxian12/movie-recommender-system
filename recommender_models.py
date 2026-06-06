@@ -25,7 +25,7 @@ def load_data():
         values="rating"
     ).fillna(0)
     
-    return movies, user_item_matrix
+    return movies,ratings, user_item_matrix
 
 # Load AI model
 @st.cache_resource
