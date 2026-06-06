@@ -457,7 +457,7 @@ elif st.session_state.mode == "user":
         st.header("Personalized Picks")
         st.caption("Custom tailored choices calculated from your historical ratings.")
         recs = recommend_cf(st.session_state.user_id, user_item_matrix, item_topk, movies).reset_index(drop=True)
-        selected = render_movie_grid(recs.head(10), "user_cf")
+        selected = render_movie_grid(recs.head(5), "user_cf")
         if selected is not None:
             show_movie(selected)
 
