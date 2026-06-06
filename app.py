@@ -360,7 +360,6 @@ if st.session_state.mode == "home":
                 """
                 * 📈 **Made For You**: Get smart picks based on movies you've already rated.
                 * 🎯 **Smart Predictions**: The more you rate, the better our guesses get.
-                * 📂 **Saved History**: Keep track of your personal viewing history.
                 """
             )
             if st.button("Log In to Your Profile", use_container_width=True, type="primary", icon="🔑"):
@@ -372,9 +371,8 @@ if st.session_state.mode == "home":
             st.markdown("### 🚀 Quick Guest Mode")
             st.markdown(
                 """
-                * 📄 **Search by Vibe**: Find movies by matching descriptions, moods.
-                * 🎭 **Instant Mix**: Pick a favorite film and instantly see choices just like it.
                 * 🍿 **Zero Setup**: No account or password needed—just jump straight in!
+                * 🎭 **Instant Mix**: Pick a favorite film and instantly see choices just like it.
                 """
             )
             if st.button("Continue as Guest", use_container_width=True,type="primary", icon="👋"):
@@ -455,7 +453,14 @@ elif st.session_state.mode == "user":
 
     with tab1:
         st.header("Personalized Picks")
-        st.caption("Custom tailored choices calculated from your historical ratings.")
+        st.markdown(
+        """
+        ### Custom tailored choices based on your historical ratings.
+        Our **Item-Based Collaborative Filtering** engine analyzes the movies you've highly rated in the past, 
+        finds patterns in global user behavior to locate similar titles, and aggregates those similarity scores 
+        to predict what you'll love next.
+        """
+        )
         recs = recommend_cf(st.session_state.user_id, user_item_matrix, item_topk, movies).reset_index(drop=True)
         selected = render_movie_grid(recs.head(5), "user_cf")
         if selected is not None:
