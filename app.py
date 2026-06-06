@@ -170,7 +170,7 @@ def render_advanced_search_tab(prefix):
             with col_sort:
                 sort_option = st.selectbox(
                     "Sort results by:",
-                    ["📅 Release Date (Newest)", "📅 Release Date (Oldest)", "🔤 Title (A - Z)", "🔤 Title (Z - A)"],
+                    ["⭐ Rating (Highest to Lowest)", "⭐ Rating (Lowest to Highest)","📅 Release Date (Newest)", "📅 Release Date (Oldest)", "🔤 Title (A - Z)", "🔤 Title (Z - A)"],
                     key=f"{prefix}_sort_by"
                 )
             
@@ -179,8 +179,14 @@ def render_advanced_search_tab(prefix):
                 st.session_state[f"{prefix}_current_page"] = 0
                 st.session_state[f"{prefix}_previous_sort"] = sort_option
 
+            # Sort by Ratings
+            if sort_option == "⭐ Rating (Highest to Lowest)":
+                filtered_df = filtered_df.sort_values(by="rating", ascending=False, na_position="last")
+            elif sort_option == "⭐ Rating (Lowest to Highest)":
+                filtered_df = filtered_df.sort_values(by="rating", ascending=True, na_position="last")
+
             # Process sort parameters on the dataset string patterns (YYYY-MM-DD)
-            if sort_option == "📅 Release Date (Newest)":
+            elif sort_option == "📅 Release Date (Newest)":
                 filtered_df = filtered_df.sort_values(by="release_date", ascending=False, na_position='last')
             elif sort_option == "📅 Release Date (Oldest)":
                 filtered_df = filtered_df.sort_values(by="release_date", ascending=True, na_position='last')
