@@ -5,17 +5,13 @@ import math
 from recommender_models import (load_data, load_models, recommend_cf, recommend_content, recommend_semantic)
 
 # Call the function to get data
-movies, user_item_matrix = load_data()
+movies,ratings, user_item_matrix = load_data()
 item_topk, content_topk, embeddings = load_models()
 
 
 # ========================================================================================================================================================================================================    
 #                                                                                FUNCTION / FORMAT PART
 # ======================================================================================================================================================================================================== 
-def logout():
-    st.session_state.mode = "home"
-    if "user_id" in st.session_state:
-        del st.session_state.user_id
 
 # ============================================================================================
 #                                    TAB DETAILS 
@@ -334,6 +330,11 @@ def show_movie(movie):
 # =========================
 # SESSION STATE CONTROL
 # =========================
+def logout():
+    st.session_state.mode = "home"
+    if "user_id" in st.session_state:
+        del st.session_state.user_id
+        
 if "mode" not in st.session_state: # prevents data from being reset when the app re-runs from top to bottom on user interaction
     st.session_state.mode = "home"
 
