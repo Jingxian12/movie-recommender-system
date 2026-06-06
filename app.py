@@ -181,9 +181,9 @@ def render_advanced_search_tab(prefix):
 
             # Sort by Ratings
             if sort_option == "⭐ Rating (Highest to Lowest)":
-                filtered_df = filtered_df.sort_values(by="rating", ascending=False, na_position="last")
+                filtered_df = filtered_df.sort_values(by="vote_average", ascending=False, na_position="last")
             elif sort_option == "⭐ Rating (Lowest to Highest)":
-                filtered_df = filtered_df.sort_values(by="rating", ascending=True, na_position="last")
+                filtered_df = filtered_df.sort_values(by="vote_average", ascending=True, na_position="last")
 
             # Process sort parameters on the dataset string patterns (YYYY-MM-DD)
             elif sort_option == "📅 Release Date (Newest)":
