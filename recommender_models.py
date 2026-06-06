@@ -145,7 +145,7 @@ def recommend_semantic(query, embeddings, movies, top_k=10):
     """Hybrid Semantic Search that intercepts short keywords and falls back to AI ranking."""
     clean_query = query.strip().lower()
     if not clean_query:
-        return pd.DataFrame()
+        return pd.DataFrame()  # return empty dataframe
         
     # Handle NaN safety check for string comparisons
     movies_clean = movies.copy()
@@ -161,16 +161,17 @@ def recommend_semantic(query, embeddings, movies, top_k=10):
         (movies_clean['production_companies'].str.lower().str.contains(clean_query))    
     ]
     
-    if len(clean_query.split()) <= 2 and not keyword_matches.empty:
+    if len(clean_query.split()) <= 3 and not keyword_matches.empty:
         sort_col = 'popularity' if 'popularity' in keyword_matches.columns else keyword_matches.index.name
         result = keyword_matches.sort_values(by=sort_col, ascending=False).head(top_k).copy()
         result['rerank_score'] = 99.0  
         return result
 
-    # STEP 2: DEEP SEMANTIC AI RE-RANKING (Using local cached models)
+    # STEP 2: DEEP SEMANTIC AI RE-RANKING (Using local cached models) 
+    # BI encoder
     query_vec = model.encode([query])
     scores = cosine_similarity(query_vec, embeddings)[0]
-    candidate_indices = np.argsort(scores)[::-1][:30]
+    candidate_indices = np.argsort(scores)[::-1][:30] # get top 30 candidate movies ([::-1]reverse the order)
     
     candidates = movies_clean.iloc[candidate_indices].copy()
     
@@ -178,6 +179,7 @@ def recommend_semantic(query, embeddings, movies, top_k=10):
         return candidates.head(top_k) 
         
     pairs = [[query, row['tags']] for _, row in candidates.iterrows()]
+    # Cross-Encoder (re-rank the top 30 candidates by feeding the query and movie tags together for deep semantic matching.)
     cross_scores = cross_encoder.predict(pairs)
     candidates['rerank_score'] = cross_scores
     
