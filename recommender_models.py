@@ -161,7 +161,7 @@ def recommend_semantic(query, embeddings, movies, top_k=10):
         (movies_clean['production_companies'].str.lower().str.contains(clean_query))    
     ]
     
-    if len(clean_query.split()) <= 2 and not keyword_matches.empty:
+    if len(clean_query.split()) <= 3 and not keyword_matches.empty:
         sort_col = 'popularity' if 'popularity' in keyword_matches.columns else keyword_matches.index.name
         result = keyword_matches.sort_values(by=sort_col, ascending=False).head(top_k).copy()
         result['rerank_score'] = 99.0  
