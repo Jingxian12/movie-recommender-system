@@ -50,7 +50,7 @@ Recommends movies based on user behavior and ratings.
 Implemented approaches:
 - Item-Based Collaborative Filtering
 
-The system identifies similar users or similar movies using rating patterns from the MovieLens dataset.
+The system identifies movies with similar rating patterns using the MovieLens dataset and recommends movies that are similar to those previously liked by the user.
 
 Suitable for:
 - Users with sufficient rating history.
