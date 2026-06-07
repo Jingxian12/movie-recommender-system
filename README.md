@@ -19,7 +19,7 @@ The system utilizes a **Switch Hybrid Recommendation Strategy**, dynamically sel
 - SBERT
 - Streamlit
 
-## Problem Statement
+## 2. Problem Statement
 
 The rapid growth of digital entertainment platforms has created a movie discovery problem:
 
@@ -30,8 +30,56 @@ The rapid growth of digital entertainment platforms has created a movie discover
 
 This project aims to help users discover movies more efficiently through intelligent recommendation techniques.
 
-## Objectives
+## 3. Objectives
 - Develop a personalized movie recommendation system.
 - Improve movie discovery efficiency.
 - Reduce the time users spend searching for movies.
 - Handle both existing users and new users effectively
+
+## 4. System Architecture
+The application consists of three recommendation modules and one filtering feature :
+
+A) Recommendation Modules
+i. Collaborative Filtering (CF)
+
+Recommends movies based on user behavior and ratings.
+Implemented approaches:
+- Item-Based Collaborative Filtering
+
+The system identifies similar users or similar movies using rating patterns from the MovieLens dataset.
+
+Suitable for:
+- Users with sufficient rating history.
+- Personalized recommendations based on community preferences.
+
+ii. Content-Based Filtering (CBF)
+
+Recommends movies similar to a selected movie based on movie attributes.
+Features used include:
+- Genres
+- Movie Overview
+- Keywords
+- Production Companies
+- Cast
+- Directors
+
+Movie metadata is collected from TMDB and transformed into feature vectors for similarity computation.
+
+Suitable for:
+- Users who already know a movie they like.
+- Similar movie discovery.
+
+3. NLP Semantic Search
+
+Allows users to search using natural language descriptions.
+
+Examples:
+- "I want a funny space adventure."
+- "Recommend emotional movies about friendship."
+- "Movies similar to Harry Potter but darker."
+
+The system converts movie descriptions into semantic embeddings and retrieves the most relevant movies using vector similarity search.
+
+Suitable for:
+- Users who cannot remember movie titles.
+- Intent-based movie discovery.
