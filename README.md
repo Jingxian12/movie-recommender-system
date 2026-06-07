@@ -87,7 +87,7 @@ Suitable for:
 
 **B) Filtering Feature**
 
-These do not generate recommendations. They help users narrow down results.Including : 
+These do not generate recommendations. They help users narrow down results. Including : 
 - Genre filter
 - Actor/Actress filter
 - Director filter
