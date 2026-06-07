@@ -138,6 +138,8 @@ The recommendation models are evaluated using ranking-based metrics:
 **Recall@K**
 - Measures how many relevant movies are successfully recommended.
 
+Users with fewer than 25 ratings were excluded from the Collaborative Filtering training dataset to improve recommendation quality. For users without sufficient rating history, the system provides popularity-based recommendations through Guest Mode, addressing the cold-start problem
+
 **Hit Rate@K**
 - Measures whether at least one relevant movie appears in recommendations.
 
