@@ -2,6 +2,11 @@
 Hybrid movie recommender system using CF, content-based filtering, and NLP semantic search.
 
 ---
+
+TO DO LIST : OUTPUT FOR USER MODE AND GUEST MODE, COLD START FOR EXISTING USER
+Users with fewer than 25 ratings were excluded from the Collaborative Filtering training dataset to improve recommendation quality. For users without sufficient rating history, the system provides popularity-based recommendations through Guest Mode, addressing the cold-start problem
+
+
 **Notice:** 
 This platform is a Final Year Project (FYP) Prototype. Public user registration is currently closed. External evaluators may use 'Guest Mode' or enter a pre-assigned Test User ID to evaluate the recommendation engine.
 
@@ -138,10 +143,13 @@ The recommendation models are evaluated using ranking-based metrics:
 **Recall@K**
 - Measures how many relevant movies are successfully recommended.
 
-Users with fewer than 25 ratings were excluded from the Collaborative Filtering training dataset to improve recommendation quality. For users without sufficient rating history, the system provides popularity-based recommendations through Guest Mode, addressing the cold-start problem
-
 **Hit Rate@K**
 - Measures whether at least one relevant movie appears in recommendations.
 
 **NDCG@K**
 - Measures ranking quality by rewarding relevant movies appearing higher in the recommendation list.
+
+## 7. Notebook
+The project includes Jupyter notebooks used for data preprocessing, exploratory analysis, and model development. These notebooks document the end-to-end machine learning pipeline from raw data to final recommendation models.
+- notebook/Movie_Recommender_System_(PART_A)_.ipynb
+- notebook/Movie_Recommender_System_(PART_B)_.ipynb
