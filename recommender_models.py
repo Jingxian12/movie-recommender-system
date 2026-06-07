@@ -178,7 +178,7 @@ def recommend_semantic(query, embeddings, movies, top_k=10):
     if 'nlp_tags' not in candidates.columns:
         return candidates.head(top_k) 
         
-    pairs = [[query, row['tags']] for _, row in candidates.iterrows()]
+    pairs = [[query, row['nlp_tags']] for _, row in candidates.iterrows()]
     # Cross-Encoder (re-rank the top 30 candidates by feeding the query and movie tags together for deep semantic matching.)
     cross_scores = cross_encoder.predict(pairs)
     candidates['rerank_score'] = cross_scores
