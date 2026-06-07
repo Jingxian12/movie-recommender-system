@@ -23,9 +23,9 @@ The system utilizes a **Switch Hybrid Recommendation Strategy**, dynamically sel
 
 The rapid growth of digital entertainment platforms has created a movie discovery problem:
 
-Thousands of movies are available online.
-Users have limited time to search manually.
-Traditional keyword searches may fail to capture user preferences.
-New users may have insufficient rating history for collaborative filtering.
+- Thousands of movies are available online.
+- Users have limited time to search manually.
+- Traditional keyword searches may fail to capture user preferences.
+- New users may have insufficient rating history for collaborative filtering.
 
 This project aims to help users discover movies more efficiently through intelligent recommendation techniques.
