@@ -12,13 +12,6 @@ This project presents a **Hybrid Movie Recommender System** that combines multip
 
 The system utilizes a **Switch Hybrid Recommendation Strategy**, dynamically selecting the most suitable recommendation method based on the user's input and available information.
 
-**The application is built using:**
-- Python 3.14
-- Scikit-learn
-- TFIDF
-- SBERT
-- Streamlit
-
 ## 2. Problem Statement
 
 The rapid growth of digital entertainment platforms has created a movie discovery problem:
@@ -37,11 +30,14 @@ This project aims to help users discover movies more efficiently through intelli
 - Handle both existing users and new users effectively
 
 ## 4. System Architecture
+
+**Switch Hybrid Strategy** : Instead of combining recommendation scores directly, this project uses a Switch Hybrid Recommender which user can select one of the recommendation engine at a time.
+
 The application consists of three recommendation modules and one filtering feature :
 
-**A) Recommendation Modules**
+### **A) Recommendation Modules**
 
-i. Collaborative Filtering (CF)
+#### i. Collaborative Filtering (CF)
 
 Recommends movies based on user behavior and ratings.
 Implemented approaches:
@@ -53,7 +49,7 @@ Suitable for:
 - Users with sufficient rating history.
 - Personalized recommendations based on community preferences.
 
-ii. Content-Based Filtering (CBF)
+#### ii. Content-Based Filtering (CBF)
 
 Recommends movies similar to a selected movie based on movie attributes.
 Features used include:
@@ -70,7 +66,7 @@ Suitable for:
 - Users who already know a movie they like.
 - Similar movie discovery.
 
-iii. NLP Semantic Search
+#### iii. NLP Semantic Search
 
 Allows users to search using natural language descriptions.
 
@@ -85,9 +81,42 @@ Suitable for:
 - Users who cannot remember movie titles.
 - Intent-based movie discovery.
 
-**B) Filtering Feature**
+###  **B) Filtering Feature**
 
 These do not generate recommendations. They help users narrow down results. Including : 
 - Genre filter
 - Actor/Actress filter
 - Director filter
+
+
+## Dataset
+
+We have two datasets using in this project 
+
+### i) MovieLens Dataset (dataset/rating_clean.csv)
+Used for:
+- User ratings
+- User IDs
+- Collaborative Filtering
+
+Dataset Source:
+- Kaggle(https://www.kaggle.com/datasets/abhikjha/movielens-100k)
+
+### ii) TMDB Dataset (dataset/tmdb_clean.csv)
+Used for:
+- Content-Based Filtering
+- NLP Semantic Search
+
+Dataset Source:
+- TMDB API key
+- Kaggle (https://www.kaggle.com/datasets/tmdb/tmdb-movie-metadata)
+
+## 5. Technologies Used
+
+**The application is built using:**
+- Python 3.14
+- NLP
+  - TFIDF
+  - SBERT(Sentence Transformers)
+- Consine Similarity
+- Streamlit
