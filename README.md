@@ -12,6 +12,13 @@ This project presents a **Hybrid Movie Recommender System** that combines multip
 
 The system utilizes a **Switch Hybrid Recommendation Strategy**, dynamically selecting the most suitable recommendation method based on the user's input and available information.
 
+### Features
+- Personalized recommendations
+- Similar movie recommendations
+- Natural language movie search
+- Movie poster display
+- Interactive web interface
+
 ## 2. Problem Statement
 
 The rapid growth of digital entertainment platforms has created a movie discovery problem:
@@ -120,3 +127,19 @@ Dataset Source:
   - SBERT(Sentence Transformers)
 - Consine Similarity
 - Streamlit
+
+## 6. Evaluation Metrics
+
+The recommendation models are evaluated using ranking-based metrics:
+
+**Precision@K**
+- Measures how many recommended movies are relevant.
+
+**Recall@K**
+- Measures how many relevant movies are successfully recommended.
+
+**Hit Rate@K**
+- Measures whether at least one relevant movie appears in recommendations.
+
+**NDCG@K**
+- Measures ranking quality by rewarding relevant movies appearing higher in the recommendation list.
