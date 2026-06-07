@@ -39,7 +39,8 @@ This project aims to help users discover movies more efficiently through intelli
 ## 4. System Architecture
 The application consists of three recommendation modules and one filtering feature :
 
-A) Recommendation Modules
+**A) Recommendation Modules**
+
 i. Collaborative Filtering (CF)
 
 Recommends movies based on user behavior and ratings.
@@ -69,7 +70,7 @@ Suitable for:
 - Users who already know a movie they like.
 - Similar movie discovery.
 
-3. NLP Semantic Search
+iii. NLP Semantic Search
 
 Allows users to search using natural language descriptions.
 
@@ -83,3 +84,10 @@ The system converts movie descriptions into semantic embeddings and retrieves th
 Suitable for:
 - Users who cannot remember movie titles.
 - Intent-based movie discovery.
+
+**B) Filtering Feature**
+
+These do not generate recommendations. They help users narrow down results.Including : 
+- Genre filter
+- Actor/Actress filter
+- Director filter
