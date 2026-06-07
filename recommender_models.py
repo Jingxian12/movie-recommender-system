@@ -175,7 +175,7 @@ def recommend_semantic(query, embeddings, movies, top_k=10):
     
     candidates = movies_clean.iloc[candidate_indices].copy()
     
-    if 'tags' not in candidates.columns:
+    if 'nlp_tags' not in candidates.columns:
         return candidates.head(top_k) 
         
     pairs = [[query, row['tags']] for _, row in candidates.iterrows()]
