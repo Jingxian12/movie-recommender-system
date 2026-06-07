@@ -29,3 +29,9 @@ The rapid growth of digital entertainment platforms has created a movie discover
 - New users may have insufficient rating history for collaborative filtering.
 
 This project aims to help users discover movies more efficiently through intelligent recommendation techniques.
+
+## Objectives
+- Develop a personalized movie recommendation system.
+- Improve movie discovery efficiency.
+- Reduce the time users spend searching for movies.
+- Handle both existing users and new users effectively
