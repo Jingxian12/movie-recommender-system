@@ -3,7 +3,7 @@ Hybrid movie recommender system using CF, content-based filtering, and NLP seman
 
 ---
 **Notice:** 
-This platform is a Data Science Research Prototype. Public user registration is currently closed. External evaluators may use 'Guest Mode' or enter a pre-assigned Test User ID to evaluate the recommendation engine.
+This platform is a Final Year Project (FYP) Prototype. Public user registration is currently closed. External evaluators may use 'Guest Mode' or enter a pre-assigned Test User ID to evaluate the recommendation engine.
 
 ## 1. Overview
 With thousands of movies released across multiple streaming platforms every year, users often struggle to find content that matches their interests. Traditional searching methods require users to browse through large catalogs manually, which can be time-consuming and overwhelming.
