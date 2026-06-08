@@ -485,7 +485,7 @@ elif st.session_state.mode == "user":
             
         else:
             # COLD START FALLBACK
-            st.markdown(
+            st.caption(
             """
             ### Welcome to the community! 
             Since you are a new user or haven't rated 25+ movies above 3.5 yet, here are some of our **most popular trending hits** to get you started! Once you rate more films, this space will personalize automatically.
