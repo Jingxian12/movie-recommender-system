@@ -6,6 +6,7 @@ from recommender_models import (load_data, load_models, recommend_cf, recommend_
 
 # Call the function to get data
 movies,ratings, user_item_matrix = load_data()
+user_item_matrix, valid_users = build_cf_matrix(ratings)
 item_topk, content_topk, embeddings = load_models()
 
 
@@ -464,15 +465,39 @@ elif st.session_state.mode == "user":
 
     with tab1:
         st.header("Personalized Picks")
-        st.markdown(
-        """
-        ### Custom tailored choices based on your historical ratings.
-        Our **Item-Based Collaborative Filtering** engine analyzes the movies you've highly rated in the past, 
-        finds patterns in global user behavior to locate similar titles, and aggregates those similarity scores 
-        to predict what you'll love next.
-        """
-        )
-        recs = recommend_cf(st.session_state.user_id, user_item_matrix, item_topk, movies).reset_index(drop=True)
+        
+        current_user = st.session_state.user_id
+        # Check if the user qualifies for Collaborative Filtering
+        if current_user in valid_users:
+            st.markdown(
+            """
+            ### Custom tailored choices based on your historical ratings.
+            Our **Item-Based Collaborative Filtering** engine analyzes the movies you've highly rated in the past.
+            """
+            )
+            # Call your CF model using the matrix generated in the background
+            recs = recommend_cf(
+                current_user, 
+                user_item_matrix, 
+                item_topk, 
+                movies
+            ).reset_index(drop=True)
+            
+        else:
+            # COLD START FALLBACK
+            st.markdown(
+            """
+            ### Welcome to the community! 
+            Since you are a new user or haven't rated 25+ movies above 3.5 yet, here are some of our **most popular trending hits** to get you started! Once you rate more films, this space will personalize automatically.
+            """
+            )
+            
+            # Call your custom fallback function here
+            # (Make sure get_popular_movies is imported or defined above this)
+            recs = get_popular_movies(movies, min_votes=10000, top_n=5)
+    
+        # Render the grid for whichever recommendations were generated above
+        # (recs will match format since both paths return a reset-indexed DataFrame)
         selected = render_movie_grid(recs.head(5), "user_cf")
         if selected is not None:
             show_movie(selected)
