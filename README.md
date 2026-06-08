@@ -122,11 +122,13 @@ Dataset Source:
 ## 5. Technologies Used
 
 **The application is built using:**
-- Python 3.14
-- NLP
-  - TFIDF
-  - SBERT(Sentence Transformers)
-- Consine Similarity
+- Python
+- Pandas
+- NumPy
+- Scikit-Learn
+- TF-IDF Vectorizer
+- Sentence Transformers (SBERT)
+- Cosine Similarity
 - Streamlit
 
 ## 6. Evaluation Metrics
