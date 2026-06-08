@@ -2,13 +2,8 @@
 Hybrid movie recommender system using CF, content-based filtering, and NLP semantic search.
 
 ---
-
-TO DO LIST : OUTPUT FOR USER MODE AND GUEST MODE, COLD START FOR EXISTING USER
-Users with fewer than 25 ratings were excluded from the Collaborative Filtering training dataset to improve recommendation quality. For users without sufficient rating history, the system provides popularity-based recommendations through Guest Mode, addressing the cold-start problem
-
-
 **Notice:** 
-This platform is a Final Year Project (FYP) Prototype. Public user registration is currently closed. External evaluators may use 'Guest Mode' or enter a pre-assigned Test User ID to evaluate the recommendation engine.
+This application is a Final Year Project (FYP) Prototype. Public user registration is currently closed. External evaluators may use 'Guest Mode' or enter a pre-assigned Test User ID to evaluate the recommendation engine.
 
 ## 1. Overview
 With thousands of movies released across multiple streaming platforms every year, users often struggle to find content that matches their interests. Traditional searching methods require users to browse through large catalogs manually, which can be time-consuming and overwhelming.
@@ -22,6 +17,7 @@ The system utilizes a **Switch Hybrid Recommendation Strategy**, dynamically sel
 - Similar movie recommendations
 - Natural language movie search
 - Movie poster display
+- Cold-start user support
 - Interactive web interface
 
 ## 2. Problem Statement
@@ -150,6 +146,12 @@ The recommendation models are evaluated using ranking-based metrics:
 - Measures ranking quality by rewarding relevant movies appearing higher in the recommendation list.
 
 ## 7. Notebook
-The project includes Jupyter notebooks used for data preprocessing, exploratory analysis, and model development. These notebooks document the end-to-end machine learning pipeline from raw data to final recommendation models.
+The project includes Jupyter notebooks used for data preprocessing, exploratory analysis, and model development. These notebooks document the end-to-end machine learning pipeline from raw data to final recommendation models. Can refer inside this repository :
 - notebook/Movie_Recommender_System_(PART_A)_.ipynb
 - notebook/Movie_Recommender_System_(PART_B)_.ipynb
+
+## 8. Recommendation Workflow
+
+## 9. How to use the app
+
+## 10. Output
