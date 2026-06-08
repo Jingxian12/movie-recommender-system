@@ -469,7 +469,7 @@ elif st.session_state.mode == "user":
         current_user = st.session_state.user_id
         # Check if the user qualifies for Collaborative Filtering
         if current_user in valid_users:
-            st.markdown(
+            st.caption(
             """
             ### Custom tailored choices based on your historical ratings.
             Our **Item-Based Collaborative Filtering** engine analyzes the movies you've highly rated in the past.
