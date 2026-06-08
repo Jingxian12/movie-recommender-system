@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import math
-from recommender_models import (load_data, load_models, recommend_cf, recommend_content, recommend_semantic)
+from recommender_models import (load_data, load_models,build_cf_matrix, recommend_cf, recommend_content, recommend_semantic)
 
 # Call the function to get data
 movies,ratings, user_item_matrix = load_data()
