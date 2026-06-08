@@ -169,6 +169,8 @@ A decision layer determines whether a user should receive Collaborative Filterin
 
 ## 9. How to use the app
 
+Start the application using Streamlit (https://movie-recommender-system-jingxian.streamlit.app//)
+
 ### A) User 
 - Open the application.
 - Click "Log In to your profile".
