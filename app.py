@@ -16,6 +16,11 @@ item_topk, content_topk, embeddings = load_models()
 # ============================================================================================
 #                                    TAB DETAILS 
 # ============================================================================================
+# Tab 1
+def get_popular_movies(movies,min_votes=10000,top_n=5):
+    qualified = movies[movies["vote_count"] >= min_votes]
+    return (qualified.sort_values(by=["popularity", "vote_count"],ascending=[False, False]).head(top_n).reset_index(drop=True))
+
 # Tab 2
 def render_similar_mix_tab(prefix):
     """Reusable Component for Tab 2: Content-Based Matching"""
@@ -504,10 +509,7 @@ elif st.session_state.mode == "guest":
     with tab1:
         st.header("🔥 What's Hot")
         st.caption("The most famous blockbuster movies actively trending globally right now.")
-        min_votes = 10000
-        qualified = movies[movies["vote_count"] >= min_votes]
-        popular_recs = qualified.sort_values(by=["popularity", "vote_count"], ascending=[False, False]).head(5).reset_index(drop=True)
-        
+        popular_recs = get_popular_movies(movies)
         selected = render_movie_grid(popular_recs, "guest_hot")
         if selected is not None:
             show_movie(selected)
