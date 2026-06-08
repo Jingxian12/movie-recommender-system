@@ -59,7 +59,7 @@ Suitable for:
 
 #### ii. Content-Based Filtering (CBF)
 
-Recommends movies similar to a selected movie based on movie attributes.
+Recommends movies similar to a selected movie based on movie attributes by applying TF-IDF Vectorization.
 Features used include:
 - Genres
 - Movie Overview
@@ -76,7 +76,7 @@ Suitable for:
 
 #### iii. NLP Semantic Search
 
-Allows users to search using natural language descriptions.
+Allows users to search using natural language descriptions. The system uses SBERT (Sentence-BERT) to convert the user’s input into semantic embeddings and compares them with movie embeddings to retrieve the most relevant results based on meaning and context.
 
 Examples:
 - "I want a funny space adventure."
@@ -90,16 +90,19 @@ Suitable for:
 - Intent-based movie discovery.
 
 ###  **B) Filtering Feature**
+- This feature allows users to filter movies based on **specific metadata attributes**. Unlike recommendation-based methods, this is a rule-based filtering function that does not generate recommendations using similarity or machine learning models.
 
-These do not generate recommendations. They help users narrow down results. Including : 
-- Genre filter
-- Actor/Actress filter
-- Director filter
+- These do not generate recommendations. They help users narrow down results. Including : 
+  - Genre filter
+  - Actor/Actress filter
+  - Director filter
 
 
 ## 5. Dataset
 
 We have two datasets using in this project 
+
+**Notes :** The dataset used in this project contains movie data up to the year 2018. Therefore, movies released after 2018 are not included in the current system
 
 ### i) MovieLens Dataset (dataset/rating_clean.csv)
 Used for:
@@ -191,4 +194,103 @@ Start the application using Streamlit (https://movie-recommender-system-jingxian
 
 ## 11. Output
 
+### A) Home Page
+When the Streamlit application is launched, the user is directed to the homepage as shown in the diagram below. 
+- The homepage provides two main options: **logging in as a registered user** or **continuing as a guest user**.
+- At the bottom of the homepage, the system displays the latest movies based on release year within the dataset (up to 2018), allowing users to explore more recent titles available in the system.
+
+<p align="center">
+  <img src="images/home/home_page.png" width="1000" height="850" style="display:inline-block;" />
+</p>
+
+### B) User Page
+To access User Mode, users are required to enter a valid User ID and Password.
+- The system verifies the credentials against the registered user records.
+- If the entered credentials do not match any existing account, a warning message will be displayed, and the user will be prompted to re-enter the correct User ID and Password.
+
+ #### i) Invalid UserID
+ <p align="center">
+    <img src="images/login/login_invalid_userid.png" width="800" height="600" style="display:inline-block;" />
+  </p>
+  
+  #### ii) Invalid User password
+  <p align="center">
+    <img src="images/login/login_invalid_password.png" width="800" height="600" style="display:inline-block;" />
+  </p>
+
+ #### iii) Successful Login
+ After successful authentication, users can access personalized recommendation features.
+ 
+ ##### iii(a) Personalized Recommendations (Collaborative Filtering)
+- Users with sufficient rating history receive personalized movie recommendations generated using Item-Based Collaborative Filtering.
+
+  <p align="center">
+  <img src="images/login/personalized_user.png" width="1000" height="850" style="display:inline-block;" />
+  </p>
+
+##### iii(b) Cold-Start Recommendations
+- Users with insufficient rating history (fewer than 25 ratings) are identified as cold-start users. Instead of Collaborative Filtering, the system displays popularity-based movie recommendations.
+  
+  <p align="center">
+  <img src="images/login/cold_start_users.png" width="1000" height="850" style="display:inline-block;" />
+  </p>
+
+### C) Guest Page
+- Guest Mode is intended for unregistered users without rating history. Similar to cold-start users, the system displays popularity-based recommendations instead of Collaborative Filtering results. The recommended movies are selected from the most popular titles in the dataset.
+
+  <p align="center">
+  <img src="images/guest/guest_login.png" width="1000" height="850" style="display:inline-block;" />
+  </p>
+
+### D) Shared Features
+
+The following features are available to both **User Mode** and **Guest Mode**. These modules allow users to discover movies through different recommendation and search approaches regardless of their login status.
+
+#### i) 🎥 Similar Mix (Content-Based Filtering）
+- Users can select a **movie title** and will receive recommendations for similar movies based on metadata such as genres, keywords, cast, directors, and movie overview.
+- For example, when a user selects *Toy Story 3* in the Similar Mix feature, the system recommends movies with similar characteristics, such as *Toy Story*, *Toy Story 2*, *A Bug's Life*, and other Pixar animations. 
+
+  <p align="center">
+  <img src="images/shared/similar_mix.png" width="1000" height="950" style="display:inline-block;" />
+  </p>
+
+#### ii) 💬 Search by Story (NLP Semantic Search)
+- This feature allows users to search for movies using **natural language descriptions** instead of exact movie titles.
+- For example, a user can enter a query such as: “fantasy movies featuring a school of witchcraft and wizardry called Hogwarts”, and the system will return movies such as *Harry Potter* series based on semantic similarity.
+- **Note**: The accuracy of the results depends on how well the query describes the movie. More detailed and meaningful descriptions will generally produce more accurate recommendations, while vague inputs may lead to less relevant results.
+
+ <p align="center">
+  <img src="images/shared/search_by_story.png" width="1000" height="950" style="display:inline-block;" />
+  </p>
+
+  #### iii) 🔍 Criteria Search (Filtering by Features)
+Users can narrow down movie results by selecting criteria such as genres, actor/actress, or director. The system then returns movies that strictly match the selected features from the dataset.
+- For example, a user can filter by the genre **“Animation”**, actor **“Tom Hanks”**, or director **“Christopher Nolan”** to retrieve a list of movies that match these conditions.
+- The results are displayed with pagination, with a **maximum of 20 movies per page**. Users can navigate through additional results by clicking the **“Next Page”** button.
+- Additionally, users can sort the results in different orders, including by rating, release year or title, allowing them to view movies based on their preferred ranking criteria. (Default is ratings highest to lowest)
+
+ #### iii(a) 🎥 Browse by Genre
+  <p align="center">
+  <img src="images/shared/genre.png" width="1000" height="1550" style="display:inline-block;" />
+  </p>
+
+ #### iii(b) 🎭 Find by Actor/Actress
+  <p align="center">
+  <img src="images/shared/actor_actress.png" width="1000" height="1550" style="display:inline-block;" />
+  </p>
+
+ #### iii(c) 🎬 Find by Director
+  <p align="center">
+  <img src="images/shared/director.png" width="1000" height="1550" style="display:inline-block;" />
+  </p>
+
+### E) Additional Features
+
+Across both Guest Mode and User Mode, each movie displayed in the system includes an “🎬 Info ” button. When selected, a pop-up window is triggered, displaying detailed information about the movie.
+
+The pop-up includes the movie poster along with key metadata such as title, genres, overview, cast, director, production companies, runtime, and release date. This feature allows users to quickly access detailed movie information without leaving the current page.
+
+ <p align="center">
+  <img src="images/shared/movie_details.png" width="1000" height="850" style="display:inline-block;" />
+  </p>
 
