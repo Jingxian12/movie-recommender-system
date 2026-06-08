@@ -10,7 +10,7 @@ With thousands of movies released across multiple streaming platforms every year
 
 This project presents a **Hybrid Movie Recommender System** that combines multiple recommendation techniques to deliver personalized and relevant movie suggestions efficiently.
 
-The system utilizes a **Switch Hybrid Recommendation Strategy**, dynamically selecting the most suitable recommendation method based on the user's input and available information.
+The system utilizes a **Switch Hybrid Recommendation Strategy**, dynamically selecting the most suitable recommendation method based on the user's input and available information. A decision layer determines whether a user should receive Collaborative Filtering recommendations or fallback to Popularity-Based recommendations based on their rating history. Users with fewer than 25 ratings with 3.5 are treated as cold-start users.
 
 ### Features
 - Personalized recommendations
