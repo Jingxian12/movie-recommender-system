@@ -10,7 +10,7 @@ With thousands of movies released across multiple streaming platforms every year
 
 This project presents a **Hybrid Movie Recommender System** that combines multiple recommendation techniques to deliver personalized and relevant movie suggestions efficiently.
 
-The system utilizes a **Switch Hybrid Recommendation Strategy**, dynamically selecting the most suitable recommendation method based on the user's input and available information. A decision layer determines whether a user should receive Collaborative Filtering recommendations or fallback to Popularity-Based recommendations based on their rating history. Users with fewer than 25 ratings with 3.5 are treated as cold-start users.
+The system utilizes a **Switch Hybrid Recommendation Strategy**, dynamically selecting the most suitable recommendation method based on the user's input and available information. 
 
 ### Features
 - Personalized recommendations
@@ -153,7 +153,38 @@ The project includes Jupyter notebooks used for data preprocessing, exploratory 
 - [PART B](notebook/Movie_Recommender_System_(PART_B)_.ipynb)
 
 ## 8. Recommendation Workflow
+A decision layer determines whether a user should receive Collaborative Filtering recommendations or fallback to Popularity-Based recommendations based on their rating history. Users with fewer than 25 ratings with 3.5 are treated as cold-start users.
+
+### A) Cold Start (For not enough ratings)
+- User ID -> Check rating history -> If ratings < 25 -> Popularity-Based Recommendation -> Display Trending Movies
+  
+### B) Collaborative Filtering (For enough ratings)
+- User ID -> Retrieve User Rating History -> Item-Based Collaborative Filtering -> Generate Top-N Recommendations -> Display Recommended Movies
+
+### C) Content-Based Filtering
+- Selected Movie -> Extract Movie Features -> Compute Similarity Scores -> Find Similar Movies -> Recommended Movies
+
+### D) NLP Semantic Search 
+- Natural Language Query -> Generate SBERT Embedding -> Compare Against Movie Embeddings -> Retrieve Most Similar Movies -> Recommended Movies
 
 ## 9. How to use the app
+
+### A) User 
+- Open the application.
+- Click "Log In to your profile".
+- Enter a valid Test User ID.
+- View personalized recommendations.
+- Explore similar movies.
+- Search using natural language.
+- Filter movie by using global search 
+
+### B) Guest
+- Open the application.
+- Click "Continue as Guest".
+- Browse trending movies.
+- Explore similar movies.
+- Search using natural language.
+- Filter movie by using global search 
+
 
 ## 10. Output
