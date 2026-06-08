@@ -433,7 +433,7 @@ elif st.session_state.mode == "login":
     # 2. Password input (type="password" hides the characters)
     password = st.text_input("Password", type="password", placeholder="Enter your password")
     if st.button("Submit", type="primary", use_container_width=True):
-        if uid.isdigit() and int(uid) in user_item_matrix.index:
+        if uid.isdigit() and int(uid) in ratings['userId'].values:
             # 4. Check if the password matches "123"
             if password == "123":
                 st.session_state.user_id = int(uid)
