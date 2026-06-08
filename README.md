@@ -147,8 +147,8 @@ The recommendation models are evaluated using ranking-based metrics:
 
 ## 7. Notebook
 The project includes Jupyter notebooks used for data preprocessing, exploratory analysis, and model development. These notebooks document the end-to-end machine learning pipeline from raw data to final recommendation models. Can refer inside this repository or visit the link :
-- notebook/Movie_Recommender_System_(PART_A)_.ipynb / https://github.com/Jingxian12/movie-recommender-system/blob/main/notebook/Movie_Recommender_System_(PART_A)_.ipynb
-- notebook/Movie_Recommender_System_(PART_B)_.ipynb / https://github.com/Jingxian12/movie-recommender-system/blob/main/notebook/Movie_Recommender_System_(PART_B)_.ipynb
+- [PART A](notebook/Movie_Recommender_System_(PART_A)_.ipynb)
+- [PART B](notebook/Movie_Recommender_System_(PART_B)_.ipynb)
 
 ## 8. Recommendation Workflow
 
