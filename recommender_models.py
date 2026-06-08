@@ -16,7 +16,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 def load_data():
     """Loads and prepares the DataFrames."""
     movies = pd.read_csv("dataset/tmdb_clean.csv",encoding="utf-8-sig")
-    ratings = pd.read_csv("dataset/ratings_clean.csv",encoding="utf-8-sig")
+    ratings = pd.read_csv("dataset/ratings.csv",encoding="utf-8-sig")
     
     # User-Item Matrix
     user_item_matrix = ratings.pivot_table(
