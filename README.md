@@ -97,7 +97,7 @@ These do not generate recommendations. They help users narrow down results. Incl
 - Director filter
 
 
-## Dataset
+## 5. Dataset
 
 We have two datasets using in this project 
 
@@ -119,7 +119,7 @@ Dataset Source:
 - TMDB API key
 - Kaggle (https://www.kaggle.com/datasets/tmdb/tmdb-movie-metadata)
 
-## 5. Technologies Used
+## 6. Technologies Used
 
 **The application is built using:**
 - Python
@@ -131,7 +131,7 @@ Dataset Source:
 - Cosine Similarity
 - Streamlit
 
-## 6. Evaluation Metrics
+## 7. Evaluation Metrics
 
 The recommendation models are evaluated using ranking-based metrics:
 
@@ -147,12 +147,12 @@ The recommendation models are evaluated using ranking-based metrics:
 **NDCG@K**
 - Measures ranking quality by rewarding relevant movies appearing higher in the recommendation list.
 
-## 7. Notebook
+## 8. Notebook
 The project includes Jupyter notebooks used for data preprocessing, exploratory analysis, and model development. These notebooks document the end-to-end machine learning pipeline from raw data to final recommendation models. Can refer inside this repository or visit the link :
 - [PART A](notebook/Movie_Recommender_System_(PART_A)_.ipynb)
 - [PART B](notebook/Movie_Recommender_System_(PART_B)_.ipynb)
 
-## 8. Recommendation Workflow
+## 9. Recommendation Workflow
 A decision layer determines whether a user should receive Collaborative Filtering recommendations or fallback to Popularity-Based recommendations based on their rating history. Users with fewer than 25 ratings with 3.5 are treated as cold-start users.
 
 ### A) Cold Start (For not enough ratings)
@@ -167,7 +167,7 @@ A decision layer determines whether a user should receive Collaborative Filterin
 ### D) NLP Semantic Search 
 - Natural Language Query -> Generate SBERT Embedding -> Compare Against Movie Embeddings -> Retrieve Most Similar Movies -> Recommended Movies
 
-## 9. How to use the app
+## 10. How to use the app
 
 Start the application using Streamlit (https://movie-recommender-system-jingxian.streamlit.app//)
 
@@ -189,4 +189,6 @@ Start the application using Streamlit (https://movie-recommender-system-jingxian
 - Filter movie by using global search 
 
 
-## 10. Output
+## 11. Output
+
+
