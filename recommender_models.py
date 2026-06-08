@@ -52,6 +52,40 @@ def load_models():
 # ============================================================================================================= 
 # A) Item-Based (Collaborative Filtering)
 # ============================================================================================================= 
+@st.cache_data
+def build_cf_matrix(ratings_df):
+    """
+    Builds the high-quality User-Item matrix using the Notebook criteria.
+    This matrix is used to calculate item similarities.
+    """
+    # 1. Keep only liked movies (ratings >= 3.5)
+    threshold_df = ratings_df[ratings_df["rating"] >= 3.5]
+
+    min_movie_ratings = 10
+    min_user_ratings = 25
+
+    # 2. Filter movies and users based on your notebook rules
+    movie_counts = threshold_df['movieId'].value_counts()
+    valid_movies = movie_counts[movie_counts >= min_movie_ratings].index
+
+    user_counts = threshold_df['userId'].value_counts()
+    valid_users = user_counts[user_counts >= min_user_ratings].index
+
+    # 3. Create the clean slice for the matrix
+    ratings_clean = threshold_df[
+        (threshold_df['movieId'].isin(valid_movies)) &
+        (threshold_df['userId'].isin(valid_users))
+    ]
+    
+    # 4. Generate the matrix (using tmdbId as per your Code 2)
+    user_item_matrix = ratings_clean.pivot_table(
+        index="userId",
+        columns="tmdbId", 
+        values="rating"
+    ).fillna(0)
+    
+    return user_item_matrix, set(valid_users)
+    
 def recommend_cf(user_id, user_item_matrix, item_topk, movies):
     """Collaborative Filtering recommendation strategy with correct ranking and rating weighting."""
     
