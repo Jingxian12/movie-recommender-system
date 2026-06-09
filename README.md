@@ -1,6 +1,7 @@
 # movie-recommender-system
 Hybrid movie recommender system using CF, content-based filtering, and NLP semantic search.
 
+Streamlit App ： (https://movie-recommender-system-jingxian.streamlit.app//)
 ---
 **Notice:** 
 This application is a Final Year Project (FYP) Prototype. Public user registration is currently closed. External evaluators may use 'Guest Mode' or enter a pre-assigned Test User ID to evaluate the recommendation engine.
