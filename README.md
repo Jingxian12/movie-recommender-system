@@ -1,5 +1,5 @@
 # movie-recommender-system
-Hybrid movie recommender system using CF, content-based filtering, and NLP semantic search.
+Hybrid movie recommender system using Collaborative Filtering, Content-Based Filtering, and NLP semantic search.
 
 Streamlit App ： (https://movie-recommender-system-jingxian.streamlit.app//)
 
